@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api';
+import api, { apiBase } from '../api';
 
 function LearningDashboard() {
   const [enrollments, setEnrollments] = useState([]);
@@ -176,7 +176,7 @@ function LearningDashboard() {
                   <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {certificates[enrollment.course] && (
                       <a
-                        href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/certificates/${certificates[enrollment.course].id}/download/`}
+                        href={`${apiBase}/certificates/${certificates[enrollment.course].id}/download/`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-primary"
