@@ -86,11 +86,29 @@ class CertificateViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CertificateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_permissions(self):
+        if self.action == 'download':
+            return [permissions.AllowAny()]
+        return super().get_permissions()
+
     def get_queryset(self):
+        if self.action == 'download' and (not self.request.user or not self.request.user.is_authenticated):
+            token = self.request.query_params.get('token')
+            if token:
+                from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+                from rest_framework_simplejwt.authentication import JWTAuthentication
+                try:
+                    validated_token = JWTAuthentication().get_validated_token(token)
+                    self.request.user = JWTAuthentication().get_user(validated_token)
+                except (InvalidToken, TokenError):
+                    pass
         return Certificate.objects.filter(student=self.request.user)
 
     @action(detail=True, methods=['get'])
     def download(self, request, pk=None):
+        if not request.user or not request.user.is_authenticated:
+            return Response({'detail': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
+            
         certificate = self.get_object()
         student_name = certificate.student.get_full_name() or certificate.student.username
         course_title = certificate.course.title

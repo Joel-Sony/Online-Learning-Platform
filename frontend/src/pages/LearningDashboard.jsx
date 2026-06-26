@@ -176,7 +176,7 @@ function LearningDashboard() {
                   <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {certificates[enrollment.course] && (
                       <a
-                        href={`${apiBase}/certificates/${certificates[enrollment.course].id}/download/`}
+                        href={`${apiBase}/certificates/${certificates[enrollment.course].id}/download/?token=${localStorage.getItem('access')}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-primary"
