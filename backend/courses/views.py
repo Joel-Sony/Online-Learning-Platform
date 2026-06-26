@@ -1,0 +1,134 @@
+from django.db.models import Avg, Count, Q, Sum
+from rest_framework import viewsets, permissions, filters, status, generics
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.contrib.auth import get_user_model
+
+from django_filters.rest_framework import DjangoFilterBackend
+from .models import Course, Module, Lesson
+from .serializers import CourseSerializer, CourseListSerializer, ModuleSerializer, LessonSerializer
+from .permissions import IsMentorOrReadOnly, IsOwnerOrAdmin
+from .filters import CourseFilter
+from users.serializers import MentorSearchSerializer
+
+User = get_user_model()
+
+class CourseViewSet(viewsets.ModelViewSet):
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = CourseFilter
+    search_fields = ['title', 'description', 'mentor__username']
+    ordering_fields = ['price', 'created_at', 'enrollment_count', 'avg_rating']
+    ordering = ['-created_at']
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return CourseListSerializer
+        return CourseSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated(), IsMentorOrReadOnly(), IsOwnerOrAdmin()]
+
+    def perform_create(self, serializer):
+        serializer.save(mentor=self.request.user)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
+    def approve(self, request, pk=None):
+        course = self.get_object()
+        course.is_published = True # Assuming approval means publishing for now
+        course.save()
+        
+        from notifications.utils import create_notification
+        create_notification(
+            recipient=course.mentor,
+            type='ANNOUNCEMENT',
+            message=f"Your course '{course.title}' has been approved and published.",
+            course=course
+        )
+        return Response({'status': 'Course approved'})
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
+    def reject(self, request, pk=None):
+        course = self.get_object()
+        # You might want a reason field in the request
+        reason = request.data.get('reason', 'No reason provided.')
+        
+        from notifications.utils import create_notification
+        create_notification(
+            recipient=course.mentor,
+            type='ANNOUNCEMENT',
+            message=f"Your course '{course.title}' was not approved. Reason: {reason}",
+            course=course
+        )
+        return Response({'status': 'Course rejected'})
+
+
+    def get_queryset(self):
+        queryset = Course.objects.annotate(
+            avg_rating=Avg('reviews__rating'),
+            enrollment_count=Count('enrollments', distinct=True),
+            total_duration=Sum('modules__lessons__duration_minutes')
+        )
+        
+        user = self.request.user
+        if user.is_authenticated:
+            if user.role == 'ADMIN':
+                return queryset
+            if user.role == 'MENTOR':
+                # Show published courses + mentor's own courses
+                return queryset.filter(Q(is_published=True) | Q(mentor=user)).distinct()
+        
+        # Unauthenticated users or Students see only published courses
+        return queryset.filter(is_published=True)
+
+class ModuleViewSet(viewsets.ModelViewSet):
+    queryset = Module.objects.all()
+    serializer_class = ModuleSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
+
+    def get_queryset(self):
+        course_id = self.request.query_params.get('course_id')
+        if course_id:
+            return Module.objects.filter(course_id=course_id)
+        return Module.objects.all()
+
+class LessonViewSet(viewsets.ModelViewSet):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
+
+    def perform_create(self, serializer):
+        lesson = serializer.save()
+        course = lesson.module.course
+        
+        # Phase 7: Notify enrolled students
+        from enrollments.models import Enrollment
+        from notifications.utils import create_notification
+        
+        enrolled_students = Enrollment.objects.filter(course=course, status='ACTIVE')
+        for enrollment in enrolled_students:
+            create_notification(
+                recipient=enrollment.student,
+                type='NEW_LESSON',
+                message=f"A new lesson '{lesson.title}' has been added to {course.title}.",
+                course=course
+            )
+
+    def get_queryset(self):
+
+        module_id = self.request.query_params.get('module_id')
+        if module_id:
+            return Lesson.objects.filter(module_id=module_id)
+        return Lesson.objects.all()
+
+class MentorSearchView(generics.ListAPIView):
+    serializer_class = MentorSearchSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['username', 'first_name', 'last_name', 'bio']
+
+    def get_queryset(self):
+        return User.objects.filter(role='MENTOR').annotate(
+            course_count=Count('mentored_courses', distinct=True),
+            avg_rating=Avg('mentored_courses__reviews__rating')
+        )

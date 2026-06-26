@@ -1,0 +1,348 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import api from '../api';
+
+/* ── Skeleton Card ──────────────────────────────────────────── */
+function SkeletonCard() {
+  return (
+    <div className="skeleton-card">
+      <div className="skeleton" style={{ paddingTop: '56.25%', width: '100%' }} />
+      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="skeleton" style={{ height: '10px', width: '70px', borderRadius: '20px' }} />
+        <div className="skeleton" style={{ height: '16px', width: '100%' }} />
+        <div className="skeleton" style={{ height: '16px', width: '75%' }} />
+        <div className="skeleton" style={{ height: '12px', width: '55%' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+          <div className="skeleton" style={{ height: '12px', width: '60px' }} />
+          <div className="skeleton" style={{ height: '12px', width: '40px' }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Course Card ────────────────────────────────────────────── */
+function CourseCard({ course }) {
+  const [hovered, setHovered] = useState(false);
+
+  const getLevelBadgeStyle = (level) => {
+    switch(level) {
+      case 'BEGINNER': return { background: '#f0fdf4', color: '#16a34a' };
+      case 'INTERMEDIATE': return { background: '#fffbeb', color: '#d97706' };
+      case 'ADVANCED': return { background: '#fef2f2', color: '#dc2626' };
+      default: return { background: 'var(--surface)', color: 'var(--text-secondary)' };
+    }
+  };
+
+  const levelLabel = { BEGINNER: 'Beginner', INTERMEDIATE: 'Intermediate', ADVANCED: 'Advanced' }[course.level] || course.level;
+
+  return (
+    <Link
+      to={`/courses/${course.id}`}
+      className="course-card"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Thumbnail */}
+      <div className="course-card-thumb">
+        {course.thumbnail ? (
+          <img src={course.thumbnail} alt={course.title} />
+        ) : (
+          <div className="course-card-thumb-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+        )}
+        {/* Level badge overlay */}
+        <div style={{
+          position: 'absolute', top: '10px', left: '10px',
+          ...getLevelBadgeStyle(course.level),
+          fontSize: '0.7rem', fontWeight: '600',
+          padding: '3px 9px', borderRadius: 'var(--radius-pill)',
+        }}>
+          {levelLabel}
+        </div>
+        {/* Hover view button */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.35)',
+          opacity: hovered ? 1 : 0,
+          transition: 'opacity 0.25s ease',
+        }}>
+          <span style={{
+            background: '#fff', color: 'var(--text-primary)',
+            padding: '8px 18px', borderRadius: 'var(--radius-pill)',
+            fontSize: '0.8rem', fontWeight: '600',
+            boxShadow: 'var(--shadow-md)',
+          }}>
+            View Course →
+          </span>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="course-card-body">
+        <span className="badge badge-category" style={{ alignSelf: 'flex-start' }}>
+          {course.category}
+        </span>
+
+        <h3 className="course-card-title" style={{ marginTop: '6px' }}>
+          {course.title}
+        </h3>
+
+        {course.description && (
+          <p className="course-card-description">
+            {course.description}
+          </p>
+        )}
+
+        <span className="course-card-instructor">
+          {course.mentor_name}
+        </span>
+
+        {/* Rating */}
+        <div className="rating-display" style={{ marginTop: '2px' }}>
+          <span className="stars">★★★★★</span>
+          <span className="rating-score">{course.avg_rating?.toFixed(1) || '—'}</span>
+          {course.enrollment_count > 0 && (
+            <span className="rating-count">({course.enrollment_count.toLocaleString()})</span>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="course-card-footer">
+          <span className="course-card-price">
+            {parseFloat(course.price) > 0 ? `$${parseFloat(course.price).toFixed(0)}` : 'Free'}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/* ── Filter Sidebar ─────────────────────────────────────────── */
+function FilterSidebar({ searchParams, setSearchParams }) {
+  const activeCount = Object.fromEntries(searchParams).length;
+
+  const handleFilterChange = (name, value) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value) newParams.set(name, value);
+    else newParams.delete(name);
+    setSearchParams(newParams);
+  };
+
+  return (
+    <aside className="filter-sidebar">
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Filters {activeCount > 0 && <span style={{ color: 'var(--accent)', background: 'var(--accent-light)', borderRadius: '20px', padding: '1px 6px', marginLeft: '4px', fontSize: '0.7rem' }}>{activeCount}</span>}
+        </span>
+        {activeCount > 0 && (
+          <button onClick={() => setSearchParams({})} style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '0.78rem', color: 'var(--accent)', fontFamily: 'var(--font-body)',
+            padding: '4px 8px', borderRadius: 'var(--radius-sm)',
+            transition: 'var(--transition-fast)',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--accent-light)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'none'}
+          >
+            Clear all
+          </button>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {/* Category */}
+        <div className="filter-group">
+          <div className="filter-group-label">Category</div>
+          {['', 'Development', 'Business', 'Design', 'Marketing', 'Music', 'Photography'].map(cat => (
+            <button
+              key={cat}
+              onClick={() => handleFilterChange('category', cat)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+                padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+                fontSize: '0.875rem', textAlign: 'left',
+                color: searchParams.get('category') === cat ? 'var(--accent)' : 'var(--text-secondary)',
+                background: searchParams.get('category') === cat ? 'var(--accent-light)' : 'transparent',
+                fontFamily: 'var(--font-body)',
+                transition: 'var(--transition-fast)',
+                fontWeight: searchParams.get('category') === cat ? '500' : '400',
+              }}
+              onMouseEnter={e => { if (searchParams.get('category') !== cat) e.currentTarget.style.background = 'var(--surface)'; }}
+              onMouseLeave={e => { if (searchParams.get('category') !== cat) e.currentTarget.style.background = 'transparent'; }}
+            >
+              {cat || 'All Categories'}
+              {searchParams.get('category') === cat && (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              )}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ height: '1px', background: 'var(--border)' }} />
+
+        {/* Level */}
+        <div className="filter-group">
+          <div className="filter-group-label">Level</div>
+          <select
+            className="filter-select"
+            value={searchParams.get('level') || ''}
+            onChange={(e) => handleFilterChange('level', e.target.value)}
+          >
+            <option value="">All Levels</option>
+            <option value="BEGINNER">Beginner</option>
+            <option value="INTERMEDIATE">Intermediate</option>
+            <option value="ADVANCED">Advanced</option>
+          </select>
+        </div>
+
+        <div style={{ height: '1px', background: 'var(--border)' }} />
+
+        {/* Free only */}
+        <label className="filter-checkbox-label" style={{ paddingLeft: '0' }}>
+          <input
+            type="checkbox"
+            checked={searchParams.get('is_free') === 'true'}
+            onChange={(e) => handleFilterChange('is_free', e.target.checked ? 'true' : '')}
+          />
+          Free Courses Only
+        </label>
+
+        <div style={{ height: '1px', background: 'var(--border)' }} />
+
+        {/* Sort */}
+        <div className="filter-group">
+          <div className="filter-group-label">Sort By</div>
+          <select
+            className="filter-select"
+            value={searchParams.get('ordering') || '-created_at'}
+            onChange={(e) => handleFilterChange('ordering', e.target.value)}
+          >
+            <option value="-created_at">Newest First</option>
+            <option value="price">Price: Low to High</option>
+            <option value="-price">Price: High to Low</option>
+            <option value="-avg_rating">Highest Rated</option>
+            <option value="-enrollment_count">Most Popular</option>
+          </select>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+/* ── Empty State ─────────────────────────────────────────────── */
+function EmptyState({ query, onClear }) {
+  return (
+    <div style={{ gridColumn: '1 / -1', padding: '80px 0', textAlign: 'center' }}>
+      <div className="empty-state-icon" style={{ margin: '0 auto 20px' }}>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <h3 style={{ marginBottom: '8px' }}>No courses found</h3>
+      <p style={{ color: 'var(--text-tertiary)', marginBottom: '24px', maxWidth: '380px', margin: '0 auto 24px' }}>
+        {query ? `No results for "${query}". Try a different search term or adjust your filters.` : 'No courses match your current filters.'}
+      </p>
+      <button onClick={onClear} className="btn btn-secondary">Clear Filters</button>
+    </div>
+  );
+}
+
+/* ── Main Component ─────────────────────────────────────────── */
+function CourseList() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchCourses = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/courses/', { params: Object.fromEntries(searchParams) });
+      setCourses(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchParams]);
+
+  useEffect(() => { fetchCourses(); }, [fetchCourses]);
+
+  const query = searchParams.get('search') || '';
+  const category = searchParams.get('category') || '';
+
+  const pageTitle = query
+    ? `Results for "${query}"`
+    : category
+    ? category
+    : 'All Courses';
+
+  return (
+    <div style={{ display: 'flex', gap: '48px', padding: '40px 48px', maxWidth: '1280px', margin: '0 auto', width: '100%', alignItems: 'flex-start' }}>
+      {/* Sidebar */}
+      <FilterSidebar searchParams={searchParams} setSearchParams={setSearchParams} />
+
+      {/* Main */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Page header with inline search */}
+        <div style={{ marginBottom: '28px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: '600', letterSpacing: '-0.02em' }}>
+              {pageTitle}
+            </h1>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
+              {loading ? '' : `${courses.length} course${courses.length !== 1 ? 's' : ''}`}
+            </span>
+          </div>
+
+          {/* Inline search */}
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const q = e.target.q.value;
+            const newParams = new URLSearchParams(searchParams);
+            if (q.trim()) newParams.set('search', q);
+            else newParams.delete('search');
+            setSearchParams(newParams);
+          }}>
+            <div className="search-bar" style={{ maxWidth: '480px' }}>
+              <span className="search-bar-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </span>
+              <input
+                name="q"
+                defaultValue={query}
+                key={query}
+                className="search-bar-input"
+                placeholder="Search courses, instructors, topics..."
+                style={{ width: '100%' }}
+              />
+            </div>
+          </form>
+        </div>
+
+        {/* Grid */}
+        <div className="course-grid">
+          {loading
+            ? Array(9).fill(0).map((_, i) => <SkeletonCard key={i} />)
+            : courses.length > 0
+              ? courses.map(c => <CourseCard key={c.id} course={c} />)
+              : <EmptyState query={query} onClear={() => setSearchParams({})} />
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default CourseList;
