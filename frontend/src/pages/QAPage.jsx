@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '../api';
+import api, { getWebSocketUrl } from '../api';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -282,8 +282,7 @@ function QAPage() {
         // Real-time via existing course QA WebSocket group
         const token = localStorage.getItem('access');
         if (token) {
-            const wsBaseUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8001';
-            const socketUrl = `${wsBaseUrl}/ws/course/${courseId}/qa/?token=${token}`;
+            const socketUrl = getWebSocketUrl(`/ws/course/${courseId}/qa/?token=${token}`);
             socketRef.current = new WebSocket(socketUrl);
             socketRef.current.onmessage = (event) => {
                 const data = JSON.parse(event.data);

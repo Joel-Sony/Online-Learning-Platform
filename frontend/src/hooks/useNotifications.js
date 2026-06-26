@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import api from '../api';
+import api, { getWebSocketUrl } from '../api';
 
 export const useNotifications = () => {
     const [notifications, setNotifications] = useState([]);
@@ -21,8 +21,7 @@ export const useNotifications = () => {
 
         const token = localStorage.getItem('access');
         if (token) {
-            const wsBaseUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8001';
-            const socketUrl = `${wsBaseUrl}/ws/notifications/?token=${token}`;
+            const socketUrl = getWebSocketUrl(`/ws/notifications/?token=${token}`);
             socketRef.current = new WebSocket(socketUrl);
 
             socketRef.current.onmessage = (event) => {
