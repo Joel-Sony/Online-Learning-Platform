@@ -6,7 +6,7 @@ services:
   # 1. Backend Web Service running ASGI Daphne (HTTP + WebSockets)
   - type: web
     name: learning-platform-backend
-    env: python
+    runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: daphne -b 0.0.0.0 -p $PORT core.asgi:application
@@ -40,10 +40,10 @@ services:
   # 2. Frontend Static Site running Vite React
   - type: web
     name: learning-platform-frontend
-    env: static
+    runtime: static
     rootDir: frontend
     buildCommand: npm run build
-    publishDir: dist
+    staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
         fromService:
