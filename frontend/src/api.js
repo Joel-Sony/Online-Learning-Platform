@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const rawBase = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-const apiBase = rawBase.endsWith('/api') ? rawBase : `${rawBase}/api`;
+// Remove any trailing slashes to prevent double slashes in URLs
+const cleanBase = rawBase.replace(/\/+$/, '');
+const apiBase = cleanBase.endsWith('/api') ? cleanBase : `${cleanBase}/api`;
 
 const api = axios.create({
   baseURL: apiBase,
