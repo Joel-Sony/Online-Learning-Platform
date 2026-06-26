@@ -262,6 +262,10 @@ function CourseList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestionLoading, setSuggestionLoading] = useState(false);
 
   const fetchCourses = useCallback(async () => {
     setLoading(true);
@@ -276,6 +280,35 @@ function CourseList() {
   }, [searchParams]);
 
   useEffect(() => { fetchCourses(); }, [fetchCourses]);
+
+  // Debounced autocomplete
+  useEffect(() => {
+    if (searchInput.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    setSuggestionLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get('/courses/autocomplete/', { params: { q: searchInput } });
+        setSuggestions(res.data);
+      } catch (e) {
+        setSuggestions([]);
+      } finally {
+        setSuggestionLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const applySearch = (q) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (q.trim()) newParams.set('search', q);
+    else newParams.delete('search');
+    setSearchParams(newParams);
+    setShowSuggestions(false);
+    setSuggestions([]);
+  };
 
   const query = searchParams.get('search') || '';
   const category = searchParams.get('category') || '';
@@ -304,16 +337,12 @@ function CourseList() {
             </span>
           </div>
 
-          {/* Inline search */}
+          {/* Inline search with autocomplete */}
           <form onSubmit={(e) => {
             e.preventDefault();
-            const q = e.target.q.value;
-            const newParams = new URLSearchParams(searchParams);
-            if (q.trim()) newParams.set('search', q);
-            else newParams.delete('search');
-            setSearchParams(newParams);
+            applySearch(searchInput);
           }}>
-            <div className="search-bar" style={{ maxWidth: '480px' }}>
+            <div className="search-bar" style={{ maxWidth: '480px', position: 'relative' }}>
               <span className="search-bar-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -321,12 +350,47 @@ function CourseList() {
               </span>
               <input
                 name="q"
-                defaultValue={query}
-                key={query}
+                value={searchInput}
+                onChange={e => { setSearchInput(e.target.value); setShowSuggestions(true); }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                 className="search-bar-input"
                 placeholder="Search courses, instructors, topics..."
                 style={{ width: '100%' }}
+                autoComplete="off"
               />
+              {/* Autocomplete dropdown */}
+              {showSuggestions && (suggestions.length > 0 || suggestionLoading) && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
+                  background: 'var(--bg)', border: '1px solid var(--border-strong)',
+                  borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-lg)',
+                  zIndex: 100, overflow: 'hidden',
+                }}>
+                  {suggestionLoading ? (
+                    <div style={{ padding: '12px 16px', fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>Searching...</div>
+                  ) : suggestions.map(s => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onMouseDown={() => { setSearchInput(s.title); applySearch(s.title); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        width: '100%', padding: '10px 16px', background: 'none', border: 'none',
+                        cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--font-body)',
+                        fontSize: '0.875rem', color: 'var(--text-primary)',
+                        borderBottom: '1px solid var(--border)',
+                        transition: 'background 0.1s',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-subtle)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      <span>{s.title}</span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', background: 'var(--surface)', padding: '2px 8px', borderRadius: 'var(--radius-pill)' }}>{s.category}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </form>
         </div>

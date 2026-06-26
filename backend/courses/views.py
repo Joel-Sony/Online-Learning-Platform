@@ -64,6 +64,20 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response({'status': 'Course rejected'})
 
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def autocomplete(self, request):
+        """Returns up to 7 course title suggestions for a search query."""
+        q = request.query_params.get('q', '').strip()
+        if not q or len(q) < 2:
+            return Response([])
+        results = (
+            Course.objects
+            .filter(is_published=True)
+            .filter(Q(title__icontains=q) | Q(tags__icontains=q) | Q(category__icontains=q))
+            .values('id', 'title', 'category')[:7]
+        )
+        return Response(list(results))
+
     def get_queryset(self):
         queryset = Course.objects.annotate(
             avg_rating=Avg('reviews__rating'),

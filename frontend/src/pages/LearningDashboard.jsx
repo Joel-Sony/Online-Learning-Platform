@@ -4,11 +4,25 @@ import api from '../api';
 
 function LearningDashboard() {
   const [enrollments, setEnrollments] = useState([]);
+  const [certificates, setCertificates] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchEnrollments();
+    fetchCertificates();
   }, []);
+
+  const fetchCertificates = async () => {
+    try {
+      const res = await api.get('/certificates/');
+      // Build a map of course_id -> certificate for easy lookup
+      const map = {};
+      res.data.forEach(cert => { map[cert.course] = cert; });
+      setCertificates(map);
+    } catch (err) {
+      console.error('Could not load certificates:', err);
+    }
+  };
 
   const fetchEnrollments = async () => {
     try {
@@ -141,7 +155,7 @@ function LearningDashboard() {
 
         {completed.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '3rem' }}>
-            {completed.map(enrollment => (
+                 {completed.map(enrollment => (
               <div key={enrollment.id} style={{ display: 'flex', flexDirection: 'column', border: '1px solid var(--border-strong)', background: 'var(--surface)' }}>
                 <div style={{ height: '180px', width: '100%', borderBottom: '1px solid var(--border-strong)', position: 'relative' }}>
                   {enrollment.course_details.thumbnail ? (
@@ -153,17 +167,28 @@ function LearningDashboard() {
                   )}
                 </div>
                 <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                     <h3 style={{ fontSize: '1.25rem', margin: 0, paddingRight: '1rem' }}>{enrollment.course_details.title}</h3>
-                  <div style={{ color: 'var(--text-strong)' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <div style={{ color: 'var(--success)' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {certificates[enrollment.course] && (
+                      <a
+                        href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/certificates/${certificates[enrollment.course].id}/download/`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-primary"
+                        style={{ width: '100%', textAlign: 'center' }}
+                      >
+                        🎓 Download Certificate
+                      </a>
+                    )}
+                    <Link to={`/courses/${enrollment.course}`} className="btn btn-secondary" style={{ width: '100%' }}>Review Material</Link>
                   </div>
                 </div>
-                <div style={{ marginTop: 'auto' }}>
-                  <Link to={`/courses/${enrollment.course}`} className="btn btn-secondary" style={{ width: '100%' }}>Review Material</Link>
-                </div>
               </div>
-            </div>
             ))}
           </div>
         ) : (
