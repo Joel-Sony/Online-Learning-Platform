@@ -130,7 +130,8 @@ function CourseDetails() {
   const downloadCertificate = () => {
     if (certificate) {
       const baseUrl = api.defaults.baseURL.endsWith('/') ? api.defaults.baseURL.slice(0, -1) : api.defaults.baseURL;
-      window.open(`${baseUrl}/certificates/${certificate.id}/download/`, '_blank');
+      const token = localStorage.getItem('access');
+      window.open(`${baseUrl}/certificates/${certificate.id}/download/?token=${token}`, '_blank');
     }
   };
 
