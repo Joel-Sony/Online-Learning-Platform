@@ -19,6 +19,48 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Avoid infinite loop if refresh fails, and don't try to refresh on login/register endpoints
+    const isAuthEndpoint = originalRequest.url?.endsWith('/users/login/') || originalRequest.url?.endsWith('/users/token/refresh/') || originalRequest.url?.endsWith('/users/register/');
+    
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+      originalRequest._retry = true;
+      const refreshToken = localStorage.getItem('refresh');
+
+      if (refreshToken) {
+        try {
+          // Use axios directly to avoid interceptors on the refresh call
+          const response = await axios.post(`${apiBase}/users/token/refresh/`, {
+            refresh: refreshToken,
+          });
+
+          const { access } = response.data;
+          localStorage.setItem('access', access);
+
+          // Update the authorization header and retry original request
+          originalRequest.headers.Authorization = `Bearer ${access}`;
+          return api(originalRequest);
+        } catch (refreshError) {
+          // If refresh fails, log out the user
+          localStorage.clear();
+          window.location.href = '/login';
+          return Promise.reject(refreshError);
+        }
+      } else {
+        // No refresh token, clear and redirect
+        localStorage.clear();
+        window.location.href = '/login';
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export const getWebSocketUrl = (path) => {
   const wsBaseUrl = import.meta.env.VITE_WS_URL;
   if (wsBaseUrl) {

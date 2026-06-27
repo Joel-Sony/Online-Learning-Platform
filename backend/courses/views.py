@@ -5,8 +5,11 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Course, Module, Lesson
-from .serializers import CourseSerializer, CourseListSerializer, ModuleSerializer, LessonSerializer
+from .models import Course, Module, Lesson, Quiz, QuizQuestion, QuizChoice, QuizAttempt
+from .serializers import (
+    CourseSerializer, CourseListSerializer, ModuleSerializer, LessonSerializer,
+    QuizSerializer, QuizStudentSerializer, QuizQuestionSerializer, QuizChoiceSerializer, QuizAttemptSerializer
+)
 from .permissions import IsMentorOrReadOnly, IsOwnerOrAdmin
 from .filters import CourseFilter
 from users.serializers import MentorSearchSerializer
@@ -146,3 +149,121 @@ class MentorSearchView(generics.ListAPIView):
             course_count=Count('mentored_courses', distinct=True),
             avg_rating=Avg('mentored_courses__reviews__rating')
         )
+
+
+class QuizViewSet(viewsets.ModelViewSet):
+    queryset = Quiz.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.role == 'STUDENT':
+            return QuizStudentSerializer
+        return QuizSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Quiz.objects.all()
+        
+        if user.role == 'STUDENT':
+            from enrollments.models import Enrollment
+            enrolled_courses = Enrollment.objects.filter(student=user, status='ACTIVE').values_list('course_id', flat=True)
+            return queryset.filter(module__course_id__in=enrolled_courses)
+        elif user.role == 'MENTOR':
+            return queryset.filter(module__course__mentor=user)
+        return queryset
+
+    @action(detail=True, methods=['post'], url_path='submit')
+    def submit_attempt(self, request, pk=None):
+        quiz = self.get_object()
+        student = request.user
+        
+        from enrollments.models import Enrollment
+        if not Enrollment.objects.filter(student=student, course=quiz.module.course, status='ACTIVE').exists():
+            return Response({'error': 'You are not enrolled in this course.'}, status=status.HTTP_403_FORBIDDEN)
+            
+        submitted_answers = request.data.get('answers', {})
+        if not submitted_answers:
+            return Response({'error': 'No answers submitted.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        questions = quiz.questions.all()
+        total_questions = questions.count()
+        if total_questions == 0:
+            return Response({'error': 'This quiz has no questions.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        correct_count = 0
+        for q in questions:
+            chosen_choice_id = submitted_answers.get(str(q.id)) or submitted_answers.get(q.id)
+            if chosen_choice_id:
+                try:
+                    choice = QuizChoice.objects.get(id=chosen_choice_id, question=q)
+                    if choice.is_correct:
+                        correct_count += 1
+                except QuizChoice.DoesNotExist:
+                    pass
+                    
+        score_percentage = (correct_count / total_questions) * 100
+        passed = score_percentage >= quiz.passing_score
+        
+        attempt = QuizAttempt.objects.create(
+            student=student,
+            quiz=quiz,
+            score=round(score_percentage, 2),
+            passed=passed
+        )
+        
+        if passed:
+            from notifications.utils import create_notification
+            create_notification(
+                recipient=student,
+                type='ANNOUNCEMENT',
+                message=f"Congratulations! You passed the quiz '{quiz.title}' with {attempt.score}%.",
+                course=quiz.module.course
+            )
+            
+        return Response({
+            'attempt_id': attempt.id,
+            'score': attempt.score,
+            'passed': attempt.passed,
+            'correct_answers': correct_count,
+            'total_questions': total_questions
+        }, status=status.HTTP_201_CREATED)
+
+
+class QuizQuestionViewSet(viewsets.ModelViewSet):
+    queryset = QuizQuestion.objects.all()
+    serializer_class = QuizQuestionSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
+
+    def get_queryset(self):
+        quiz_id = self.request.query_params.get('quiz_id')
+        if quiz_id:
+            return QuizQuestion.objects.filter(quiz_id=quiz_id)
+        return QuizQuestion.objects.all()
+
+
+class QuizChoiceViewSet(viewsets.ModelViewSet):
+    queryset = QuizChoice.objects.all()
+    serializer_class = QuizChoiceSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
+
+    def get_queryset(self):
+        question_id = self.request.query_params.get('question_id')
+        if question_id:
+            return QuizChoice.objects.filter(question_id=question_id)
+        return QuizChoice.objects.all()
+
+
+class QuizAttemptViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = QuizAttempt.objects.all()
+    serializer_class = QuizAttemptSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'ADMIN':
+            return QuizAttempt.objects.all()
+        elif user.role == 'MENTOR':
+            return QuizAttempt.objects.filter(quiz__module__course__mentor=user)
+        return QuizAttempt.objects.filter(student=user)
+

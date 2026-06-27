@@ -1,20 +1,67 @@
 from rest_framework import serializers
 from django.db.models import Avg
-from .models import Course, Module, Lesson
-
-
+from .models import Course, Module, Lesson, Quiz, QuizQuestion, QuizChoice, QuizAttempt
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = '__all__'
 
+class QuizChoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizChoice
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_authenticated or request.user.role == 'STUDENT':
+            rep.pop('is_correct', None)
+        return rep
+
+class QuizQuestionSerializer(serializers.ModelSerializer):
+    choices = QuizChoiceSerializer(many=True, read_only=True)
+    class Meta:
+        model = QuizQuestion
+        fields = '__all__'
+
+class QuizSerializer(serializers.ModelSerializer):
+    questions = QuizQuestionSerializer(many=True, read_only=True)
+    class Meta:
+        model = Quiz
+        fields = '__all__'
+
+class QuizChoiceStudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizChoice
+        fields = ('id', 'text')
+
+class QuizQuestionStudentSerializer(serializers.ModelSerializer):
+    choices = QuizChoiceStudentSerializer(many=True, read_only=True)
+    class Meta:
+        model = QuizQuestion
+        fields = ('id', 'text', 'order', 'choices')
+
+class QuizStudentSerializer(serializers.ModelSerializer):
+    questions = QuizQuestionStudentSerializer(many=True, read_only=True)
+    class Meta:
+        model = Quiz
+        fields = ('id', 'module', 'title', 'description', 'passing_score', 'questions')
+
+class QuizAttemptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizAttempt
+        fields = '__all__'
+        read_only_fields = ('student', 'score', 'passed', 'completed_at')
+
 class ModuleSerializer(serializers.ModelSerializer):
     lessons = LessonSerializer(many=True, read_only=True)
+    quizzes = QuizSerializer(many=True, read_only=True)
 
     class Meta:
         model = Module
         fields = '__all__'
+
 
 class CourseSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True, read_only=True)

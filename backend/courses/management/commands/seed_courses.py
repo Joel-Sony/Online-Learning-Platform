@@ -329,16 +329,21 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def _clear_data(self):
-        from courses.models import Course, Module, Lesson
+        from courses.models import Course, Module, Lesson, Quiz, QuizQuestion, QuizChoice, QuizAttempt
         from enrollments.models import Enrollment
         from progress.models import LessonProgress
 
+        QuizAttempt.objects.all().delete()
+        QuizChoice.objects.all().delete()
+        QuizQuestion.objects.all().delete()
+        Quiz.objects.all().delete()
         LessonProgress.objects.all().delete()
         Enrollment.objects.all().delete()
         Lesson.objects.all().delete()
         Module.objects.all().delete()
         Course.objects.all().delete()
-        self.stdout.write("  Cleared courses, modules, lessons, enrollments, progress.")
+        self.stdout.write("  Cleared courses, modules, lessons, quizzes, enrollments, progress.")
+
 
     def _create_instructors(self):
         instructors = {}

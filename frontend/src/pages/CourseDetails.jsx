@@ -255,7 +255,39 @@ function CourseDetails() {
                       )}
                     </div>
                   ))}
-                  {(!module.lessons || module.lessons.length === 0) && (
+                  {module.quizzes?.map(quiz => (
+                    <div key={quiz.id} style={{ 
+                      padding: '1rem 0 1rem 3rem', 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'baseline',
+                      borderBottom: '1px solid var(--border)'
+                    }}>
+                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'baseline' }}>
+                        <span style={{ color: 'var(--text-strong)', fontSize: '1.05rem', fontWeight: '500' }}>
+                          📝 Quiz: {quiz.title}
+                        </span>
+                        <span className="mono" style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+                          [Passing Score: {quiz.passing_score}%]
+                        </span>
+                      </div>
+                      
+                      {isEnrolled && (
+                        <Link 
+                          to={`/quiz/${quiz.id}`} 
+                          className="mono"
+                          style={{ 
+                            color: 'var(--accent)', 
+                            textDecoration: 'underline',
+                            fontWeight: '600'
+                          }}
+                        >
+                          Take Quiz
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                  {(!module.lessons || module.lessons.length === 0) && (!module.quizzes || module.quizzes.length === 0) && (
                     <div style={{ padding: '1rem 0 1rem 3rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                       Materials pending.
                     </div>

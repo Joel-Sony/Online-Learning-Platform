@@ -16,7 +16,7 @@ import CourseList from './pages/CourseList';
 import CreateAnnouncement from './pages/CreateAnnouncement';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailed from './pages/PaymentFailed';
-
+import TakeQuiz from './pages/TakeQuiz';
 
 import AdminDashboard from './pages/AdminDashboard';
 import AdminRoute from './components/AdminRoute';
@@ -44,6 +44,8 @@ function App() {
             <Route path="/mentor/announcement" element={<CreateAnnouncement />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-failed" element={<PaymentFailed />} />
+            <Route path="/quiz/:id" element={<TakeQuiz />} />
+
 
             <Route 
               path="/admin" 
