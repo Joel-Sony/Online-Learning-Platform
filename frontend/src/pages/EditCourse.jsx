@@ -249,13 +249,21 @@ export default function EditCourse() {
     e.preventDefault();
     setSaving(true);
     try {
-      const data = new FormData();
-      Object.keys(formData).forEach(k => data.append(k, formData[k]));
-      if (thumbnail) data.append('thumbnail', thumbnail);
-      await api.patch(`/courses/${id}/`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (thumbnail) {
+        // Multipart only when uploading a new thumbnail
+        const data = new FormData();
+        Object.keys(formData).forEach(k => data.append(k, formData[k]));
+        data.append('thumbnail', thumbnail);
+        await api.patch(`/courses/${id}/`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      } else {
+        // Plain JSON — avoids "false" string being rejected by BooleanField
+        await api.patch(`/courses/${id}/`, formData);
+      }
       alert('Course updated successfully!');
-    } catch { alert('Update failed'); }
-    finally { setSaving(false); }
+    } catch (err) {
+      const detail = err.response?.data;
+      alert('Update failed: ' + (detail ? JSON.stringify(detail) : err.message));
+    } finally { setSaving(false); }
   };
 
   const handleAddModule = async () => {
