@@ -15,13 +15,23 @@ function LearningDashboard() {
   const fetchCertificates = async () => {
     try {
       const res = await api.get('/certificates/');
-      // Build a map of course_id -> certificate for easy lookup
       const map = {};
       res.data.forEach(cert => { map[cert.course] = cert; });
       setCertificates(map);
     } catch (err) {
       console.error('Could not load certificates:', err);
     }
+  };
+
+  const getLastLesson = (courseId) => {
+    try { return localStorage.getItem(`lastLesson_${courseId}`) || ''; } catch { return ''; }
+  };
+
+  const getContinueUrl = (enrollment) => {
+    const lastLesson = getLastLesson(enrollment.course);
+    return lastLesson
+      ? `/courses/${enrollment.course}/learn/${lastLesson}`
+      : `/courses/${enrollment.course}/learn`;
   };
 
   const fetchEnrollments = async () => {
@@ -124,7 +134,7 @@ function LearningDashboard() {
                   gap: '1rem',
                   marginTop: '1rem'
                 }}>
-                  <Link to={`/courses/${enrollment.course}`} className="btn btn-primary" style={{ flex: 1 }}>
+                  <Link to={getContinueUrl(enrollment)} className="btn btn-primary" style={{ flex: 1 }}>
                     Continue
                   </Link>
                   {enrollment.status !== 'REFUNDED' && (

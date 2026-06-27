@@ -316,7 +316,10 @@ function CourseDetails() {
                 <span className="mono" style={{ color: 'var(--accent)', display: 'block', marginBottom: '1rem' }}>Status</span>
                 <h4 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Enrolled</h4>
                 <div className="form-stack">
-                  <Link to={`/courses/${id}/qa`} className="btn btn-primary" style={{ width: '100%' }}>
+                  <Link to={`/courses/${id}/learn`} className="btn btn-primary" style={{ width: '100%' }}>
+                    ▶ Continue Learning
+                  </Link>
+                  <Link to={`/courses/${id}/qa`} className="btn btn-secondary" style={{ width: '100%' }}>
                     Enter Q&A Forum
                   </Link>
                   {certificate && (

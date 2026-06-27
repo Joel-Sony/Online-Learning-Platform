@@ -8,6 +8,8 @@ import MentorDashboard from './pages/MentorDashboard';
 import CreateCourse from './pages/CreateCourse';
 import EditCourse from './pages/EditCourse';
 import MentorAnalytics from './pages/MentorAnalytics';
+import EditQuiz from './pages/EditQuiz';
+import LearnCourse from './pages/LearnCourse';
 
 import LearningDashboard from './pages/LearningDashboard';
 import QAPage from './pages/QAPage';
@@ -36,6 +38,7 @@ function App() {
             <Route path="/mentor" element={<MentorDashboard />} />
             <Route path="/mentor/create" element={<CreateCourse />} />
             <Route path="/mentor/edit/:id" element={<EditCourse />} />
+            <Route path="/mentor/quiz/:id/edit" element={<EditQuiz />} />
             <Route path="/mentor/analytics" element={<MentorAnalytics />} />
 
             <Route path="/learning" element={<LearningDashboard />} />
@@ -45,6 +48,8 @@ function App() {
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-failed" element={<PaymentFailed />} />
             <Route path="/quiz/:id" element={<TakeQuiz />} />
+            <Route path="/courses/:id/learn" element={<LearnCourse />} />
+            <Route path="/courses/:id/learn/:lessonId" element={<LearnCourse />} />
 
 
             <Route 
