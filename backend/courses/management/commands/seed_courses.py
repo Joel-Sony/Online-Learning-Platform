@@ -468,18 +468,20 @@ class Command(BaseCommand):
                     order=mod_idx + 1,
                 )
                 for les_idx, lesson_data in enumerate(mod_data.get("lessons", [])):
-                    # Support both plain string titles and dict with {title, video_url}
                     if isinstance(lesson_data, str):
                         lesson_title = lesson_data
                         lesson_video_url = None
+                        lesson_content = ""
                     else:
                         lesson_title = lesson_data["title"]
                         lesson_video_url = lesson_data.get("video_url")
+                        lesson_content = lesson_data.get("content", "")
                     Lesson.objects.create(
                         module=module,
                         title=lesson_title,
                         lesson_type="VIDEO",
                         video_url=lesson_video_url,
+                        content=lesson_content,
                         duration_minutes=(les_idx + 1) * 12,
                         order=les_idx + 1,
                     )
