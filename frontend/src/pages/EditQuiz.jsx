@@ -69,6 +69,7 @@ function EditQuiz() {
   };
 
   const handleDeleteChoice = async (choiceId) => {
+    if (!window.confirm('Delete this choice?')) return;
     try {
       await api.delete(`/quiz-choices/${choiceId}/`);
       fetchQuiz();
@@ -77,12 +78,22 @@ function EditQuiz() {
     }
   };
 
+  const handleToggleCorrect = async (choiceId, currentStatus) => {
+    if (currentStatus) return; // already correct
+    try {
+      await api.patch(`/quiz-choices/${choiceId}/`, { is_correct: true });
+      fetchQuiz();
+    } catch (err) {
+      alert('Failed to set correct answer');
+    }
+  };
+
   if (!quiz) return <div className="page loading-state"><div className="spinner"></div></div>;
 
   return (
     <div className="page" style={{ maxWidth: '800px' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <Link to={`/mentor/edit/${quiz.module.course}`} className="mono" style={{ color: 'var(--text-muted)' }}>&larr; Back to Course</Link>
+        <Link to={`/mentor/edit/${quiz.course_id}`} className="mono" style={{ color: 'var(--text-muted)' }}>&larr; Back to Course</Link>
         <h1 style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>Edit Quiz: {quiz.title}</h1>
         <p style={{ color: 'var(--text-muted)' }}>Passing Score: {quiz.passing_score}%</p>
       </div>
@@ -110,14 +121,31 @@ function EditQuiz() {
               <button className="btn btn-sm btn-ghost" style={{ color: '#d32f2f' }} onClick={() => handleDeleteQuestion(q.id)}>Delete</button>
             </div>
 
-            {q.choices?.length > 0 && (
+             {q.choices?.length > 0 && (
               <ul style={{ listStyle: 'none', padding: 0, marginBottom: '1.5rem' }}>
                 {q.choices.map(choice => (
-                  <li key={choice.id} style={{ padding: '0.5rem', background: choice.is_correct ? 'rgba(76, 175, 80, 0.1)' : 'transparent', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>
-                      {choice.is_correct && <span style={{ color: 'var(--success)', marginRight: '8px', fontWeight: 'bold' }}>✓</span>}
-                      {choice.text}
-                    </span>
+                  <li key={choice.id} style={{ padding: '0.5rem 0.8rem', background: choice.is_correct ? 'rgba(76, 175, 80, 0.08)' : 'transparent', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <button 
+                        onClick={() => handleToggleCorrect(choice.id, choice.is_correct)}
+                        style={{
+                          background: choice.is_correct ? 'var(--success)' : 'transparent',
+                          border: choice.is_correct ? '1px solid var(--success)' : '1px solid var(--border-strong)',
+                          borderRadius: '12px',
+                          color: choice.is_correct ? '#fff' : 'var(--text-muted)',
+                          padding: '2px 8px',
+                          fontSize: '0.72rem',
+                          cursor: choice.is_correct ? 'default' : 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                        disabled={choice.is_correct}
+                      >
+                        {choice.is_correct ? '✓ Correct' : '○ Mark Correct'}
+                      </button>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{choice.text}</span>
+                    </div>
                     <button className="btn btn-sm" style={{ background: 'transparent', border: 'none', color: '#d32f2f', cursor: 'pointer' }} onClick={() => handleDeleteChoice(choice.id)}>&times;</button>
                   </li>
                 ))}

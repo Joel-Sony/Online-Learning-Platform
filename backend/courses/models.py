@@ -94,6 +94,16 @@ class QuizChoice(models.Model):
     text = models.CharField(max_length=255)
     is_correct = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        if self.is_correct:
+            # Set all other choices for this question to False
+            if self.pk:
+                QuizChoice.objects.filter(question=self.question).exclude(pk=self.pk).update(is_correct=False)
+            else:
+                # If not saved yet, we can't exclude pk, but we can do it after super().save() or just clear all
+                QuizChoice.objects.filter(question=self.question).update(is_correct=False)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Choice: {self.text[:30]} ({'Correct' if self.is_correct else 'Incorrect'})"
 

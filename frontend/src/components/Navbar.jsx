@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import NotificationDropdown from './NotificationDropdown';
 
@@ -7,6 +8,11 @@ function Navbar() {
   const role = localStorage.getItem('role');
   const isAuthenticated = !!localStorage.getItem('access');
   const username = localStorage.getItem('username') || '';
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  useEffect(() => {
+    setShowUserMenu(false);
+  }, [location]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -128,32 +134,95 @@ function Navbar() {
             <>
               <NotificationDropdown />
 
-              {/* Avatar */}
-              <button
-                onClick={handleLogout}
-                title="Sign out"
-                style={{
-                  width: '34px', height: '34px',
-                  borderRadius: '50%',
-                  background: 'var(--accent)',
-                  color: '#fff',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  fontWeight: '600',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: 'var(--font-body)',
-                  transition: 'var(--transition-base)',
-                  flexShrink: 0,
-                  title: 'Sign out'
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--accent-hover)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'var(--accent)'}
-              >
-                {username ? username.charAt(0).toUpperCase() : 'U'}
-              </button>
+              {/* Avatar & Logout Section */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  title={showUserMenu ? "Collapse profile" : "Expand profile"}
+                  style={{
+                    height: '34px',
+                    minWidth: '34px',
+                    padding: showUserMenu ? '0 12px' : '0',
+                    borderRadius: showUserMenu ? '17px' : '50%',
+                    background: 'var(--accent)',
+                    color: '#fff',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    fontFamily: 'var(--font-body)',
+                    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                    flexShrink: 0,
+                    boxShadow: 'var(--shadow-sm)',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--accent-hover)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'var(--accent)'}
+                >
+                  {showUserMenu ? (
+                    <>
+                      <span style={{
+                        width: '20px', height: '20px',
+                        borderRadius: '50%',
+                        background: 'rgba(255,255,255,0.25)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.75rem',
+                        fontWeight: '700',
+                        flexShrink: 0
+                      }}>
+                        {username ? username.charAt(0).toUpperCase() : 'U'}
+                      </span>
+                      <span style={{ 
+                        animation: 'fadeIn 0.2s ease', 
+                        whiteSpace: 'nowrap',
+                        color: '#fff',
+                        letterSpacing: '-0.01em'
+                      }}>
+                        {username}
+                      </span>
+                    </>
+                  ) : (
+                    username ? username.charAt(0).toUpperCase() : 'U'
+                  )}
+                </button>
+
+                {showUserMenu && (
+                  <button
+                    onClick={handleLogout}
+                    title="Sign out"
+                    style={{
+                      height: '30px',
+                      padding: '0 10px',
+                      borderRadius: '8px',
+                      background: 'var(--error)',
+                      color: '#fff',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      fontWeight: '650',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      animation: 'fadeIn 0.2s ease',
+                      boxShadow: 'var(--shadow-sm)',
+                      transition: 'all 0.15s ease',
+                      whiteSpace: 'nowrap',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                  >
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                    </svg>
+                    Logout
+                  </button>
+                )}
+              </div>
             </>
           ) : (
             <>

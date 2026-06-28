@@ -88,7 +88,7 @@ function TakeQuiz() {
           </div>
           <h2 style={{ color: 'var(--text-primary)' }}>Access Denied</h2>
           <p>{error}</p>
-          <button onClick={() => navigate(-1)} className="btn btn-secondary" style={{ marginTop: '24px' }}>Go Back</button>
+          <button onClick={() => navigate(quiz?.course_id ? `/courses/${quiz.course_id}/learn` : -1)} className="btn btn-secondary" style={{ marginTop: '24px' }}>Go Back</button>
         </div>
       </div>
     </div>
@@ -101,7 +101,7 @@ function TakeQuiz() {
           <div className="empty-state">
             <h2 style={{ color: 'var(--text-primary)' }}>No Questions Available</h2>
             <p>This quiz is currently empty. Please check back later.</p>
-            <button onClick={() => navigate(-1)} className="btn btn-secondary" style={{ marginTop: '24px' }}>Go Back</button>
+            <button onClick={() => navigate(quiz?.course_id ? `/courses/${quiz.course_id}/learn` : -1)} className="btn btn-secondary" style={{ marginTop: '24px' }}>Go Back</button>
           </div>
         </div>
       </div>
@@ -110,9 +110,9 @@ function TakeQuiz() {
 
   if (result) {
     return (
-      <div className="page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', padding: '40px' }}>
-        <div className="card" style={{ maxWidth: '600px', width: '100%', padding: '48px', textAlign: 'center' }}>
-          <div className="empty-state">
+      <div className="page" style={{ display: 'flex', justifyContent: 'center', padding: '40px 24px', minHeight: '80vh' }}>
+        <div className="card" style={{ maxWidth: '700px', width: '100%', padding: '48px' }}>
+          <div style={{ textAlign: 'center' }}>
             {result.passed ? (
               <div className="empty-state-icon" style={{ color: 'var(--success)', background: '#f0fdf4', margin: '0 auto 24px' }}>
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -147,17 +147,77 @@ function TakeQuiz() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '40px' }}>
               {!result.passed && (
                 <button onClick={() => { setResult(null); setCurrentQuestionIndex(0); setSelectedChoices({}); }} className="btn btn-primary btn-lg">
                   Try Again
                 </button>
               )}
-              <button onClick={() => navigate(-1)} className={result.passed ? 'btn btn-primary btn-lg' : 'btn btn-secondary btn-lg'}>
+              <button onClick={() => navigate(quiz?.course_id ? `/courses/${quiz.course_id}/learn` : -1)} className={result.passed ? 'btn btn-primary btn-lg' : 'btn btn-secondary btn-lg'}>
                 Back to Course
               </button>
             </div>
           </div>
+
+          {result.question_results && result.question_results.length > 0 && (
+            <div style={{ marginTop: '40px', borderTop: '1px solid var(--border)', paddingTop: '32px' }}>
+              <h3 style={{ fontSize: '1.2rem', marginBottom: '24px', fontWeight: '600' }}>Review Your Answers</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {result.question_results.map((res, idx) => (
+                  <div 
+                    key={res.question_id} 
+                    style={{
+                      padding: '20px',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                      <span 
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: res.is_correct ? 'rgba(76, 175, 80, 0.12)' : 'rgba(211, 47, 47, 0.12)',
+                          color: res.is_correct ? 'var(--success)' : '#d32f2f',
+                          fontWeight: 'bold',
+                          fontSize: '0.85rem',
+                          flexShrink: 0
+                        }}
+                      >
+                        {res.is_correct ? '✓' : '✕'}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontWeight: '500', fontSize: '0.95rem', margin: '0 0 12px 0', color: 'var(--text-strong)', lineHeight: '1.5' }}>
+                          {idx + 1}. {res.question_text}
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.875rem' }}>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)' }}>Your Answer: </span>
+                            <span style={{ color: res.is_correct ? 'var(--success)' : '#d32f2f', fontWeight: '500' }}>
+                              {res.chosen_choice_text || '(Skipped)'}
+                            </span>
+                          </div>
+                          {!res.is_correct && (
+                            <div>
+                              <span style={{ color: 'var(--text-muted)' }}>Correct Answer: </span>
+                              <span style={{ color: 'var(--success)', fontWeight: '500' }}>
+                                {res.correct_choice_text}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );

@@ -183,8 +183,8 @@ class QuizViewSet(viewsets.ModelViewSet):
             return Response({'error': 'You are not enrolled in this course.'}, status=status.HTTP_403_FORBIDDEN)
             
         submitted_answers = request.data.get('answers', {})
-        if not submitted_answers:
-            return Response({'error': 'No answers submitted.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(submitted_answers, dict):
+            return Response({'error': 'Invalid answers format.'}, status=status.HTTP_400_BAD_REQUEST)
             
         questions = quiz.questions.all()
         total_questions = questions.count()
@@ -192,15 +192,40 @@ class QuizViewSet(viewsets.ModelViewSet):
             return Response({'error': 'This quiz has no questions.'}, status=status.HTTP_400_BAD_REQUEST)
             
         correct_count = 0
+        question_results = []
+        
         for q in questions:
             chosen_choice_id = submitted_answers.get(str(q.id)) or submitted_answers.get(q.id)
+            is_correct = False
+            correct_choice_text = ""
+            chosen_choice_text = ""
+            
+            # Find correct choice
+            try:
+                correct_choice_obj = QuizChoice.objects.filter(question=q, is_correct=True).first()
+                if correct_choice_obj:
+                    correct_choice_text = correct_choice_obj.text
+            except Exception:
+                pass
+                
             if chosen_choice_id:
                 try:
                     choice = QuizChoice.objects.get(id=chosen_choice_id, question=q)
+                    chosen_choice_text = choice.text
                     if choice.is_correct:
+                        is_correct = True
                         correct_count += 1
                 except QuizChoice.DoesNotExist:
                     pass
+            
+            question_results.append({
+                'question_id': q.id,
+                'question_text': q.text,
+                'chosen_choice_id': chosen_choice_id,
+                'chosen_choice_text': chosen_choice_text,
+                'is_correct': is_correct,
+                'correct_choice_text': correct_choice_text
+            })
                     
         score_percentage = (correct_count / total_questions) * 100
         passed = score_percentage >= quiz.passing_score
@@ -221,12 +246,29 @@ class QuizViewSet(viewsets.ModelViewSet):
                 course=quiz.module.course
             )
             
+            # Check for course completion
+            try:
+                from progress.models import LessonProgress, Certificate
+                total_lessons = Lesson.objects.filter(module__course=quiz.module.course).count()
+                completed_lessons = LessonProgress.objects.filter(student=student, course=quiz.module.course, completed=True).count()
+                if total_lessons > 0 and total_lessons == completed_lessons:
+                    if not Certificate.objects.filter(student=student, course=quiz.module.course).exists():
+                        import uuid
+                        Certificate.objects.create(
+                            student=student,
+                            course=quiz.module.course,
+                            certificate_id=f"CERT-{uuid.uuid4().hex[:8].upper()}"
+                        )
+            except Exception:
+                pass
+            
         return Response({
             'attempt_id': attempt.id,
             'score': attempt.score,
             'passed': attempt.passed,
             'correct_answers': correct_count,
-            'total_questions': total_questions
+            'total_questions': total_questions,
+            'question_results': question_results
         }, status=status.HTTP_201_CREATED)
 
 

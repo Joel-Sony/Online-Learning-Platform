@@ -27,6 +27,7 @@ class QuizQuestionSerializer(serializers.ModelSerializer):
 
 class QuizSerializer(serializers.ModelSerializer):
     questions = QuizQuestionSerializer(many=True, read_only=True)
+    course_id = serializers.ReadOnlyField(source='module.course.id')
     class Meta:
         model = Quiz
         fields = '__all__'
@@ -44,9 +45,10 @@ class QuizQuestionStudentSerializer(serializers.ModelSerializer):
 
 class QuizStudentSerializer(serializers.ModelSerializer):
     questions = QuizQuestionStudentSerializer(many=True, read_only=True)
+    course_id = serializers.ReadOnlyField(source='module.course.id')
     class Meta:
         model = Quiz
-        fields = ('id', 'module', 'title', 'description', 'passing_score', 'questions')
+        fields = ('id', 'module', 'title', 'description', 'passing_score', 'questions', 'course_id')
 
 class QuizAttemptSerializer(serializers.ModelSerializer):
     class Meta:

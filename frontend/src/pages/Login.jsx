@@ -6,10 +6,13 @@ function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     try {
       const res = await api.post('/users/login/', { username, password });
       localStorage.setItem('access', res.data.access);
@@ -22,6 +25,8 @@ function Login() {
       navigate('/');
     } catch (err) {
       setError('Invalid credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,6 +50,7 @@ function Login() {
               value={username} 
               onChange={(e) => setUsername(e.target.value)} 
               required 
+              disabled={loading}
             />
           </div>
           
@@ -57,11 +63,22 @@ function Login() {
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
+              disabled={loading}
             />
           </div>
           
-          <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%', marginTop: '2rem' }}>
-            Enter
+          <button 
+            type="submit" 
+            className="btn btn-primary btn-lg" 
+            style={{ width: '100%', marginTop: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <span className="spinner" style={{ width: '16px', height: '16px', borderTopColor: '#fff', borderLeftColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: 'transparent' }}></span>
+                Signing in...
+              </>
+            ) : 'Enter'}
           </button>
         </form>
         
