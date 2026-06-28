@@ -38,16 +38,85 @@ function LessonTypeIcon({ type }) {
 
 /* ─── Video Embed ─────────────────────────────────────────────── */
 function VideoEmbed({ url }) {
+  const [activated, setActivated] = useState(false);
   if (!url) return null;
 
-  // YouTube
+  // YouTube — show thumbnail first, load iframe on click
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   if (ytMatch) {
+    const videoId = ytMatch[1];
+    const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
+    if (!activated) {
+      return (
+        <div
+          onClick={() => setActivated(true)}
+          style={{
+            position: 'relative',
+            paddingBottom: '56.25%',
+            height: 0,
+            borderRadius: 'var(--radius-lg)',
+            overflow: 'hidden',
+            cursor: 'pointer',
+            background: '#000',
+            boxShadow: 'var(--shadow-lg)',
+          }}
+        >
+          {/* Thumbnail */}
+          <img
+            src={thumbUrl}
+            alt="Video thumbnail"
+            style={{
+              position: 'absolute', top: 0, left: 0,
+              width: '100%', height: '100%',
+              objectFit: 'cover',
+              opacity: 0.85,
+              transition: 'opacity 0.2s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '0.85'}
+            onError={e => {
+              // fallback to hqdefault if maxresdefault isn't available
+              e.currentTarget.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+            }}
+          />
+          {/* Play Button Overlay */}
+          <div style={{
+            position: 'absolute', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '72px', height: '72px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.95)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#4f46e5">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          </div>
+          {/* YouTube badge */}
+          <div style={{
+            position: 'absolute', bottom: '12px', right: '12px',
+            background: 'rgba(0,0,0,0.7)',
+            color: '#fff',
+            fontSize: '0.7rem',
+            fontWeight: '600',
+            padding: '3px 8px',
+            borderRadius: '4px',
+            letterSpacing: '0.03em',
+          }}>
+            YouTube
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-lg)' }}>
         <iframe
           style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-          src={`https://www.youtube.com/embed/${ytMatch[1]}`}
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
           title="Lesson video"

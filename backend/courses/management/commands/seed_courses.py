@@ -87,7 +87,10 @@ COURSES = [
         "instructor": "alex_morgan",
         "thumbnail_url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80",
         "modules": [
-            {"title": "Python Fundamentals", "lessons": ["Introduction to Python", "Variables and Data Types", "Control Flow", "Functions & Scope"]},
+            {"title": "Python Fundamentals", "lessons": [
+                {"title": "Introduction to Python", "video_url": "https://www.youtube.com/watch?v=K5KVEU3aaeQ"},
+                "Variables and Data Types", "Control Flow", "Functions & Scope"
+            ]},
             {"title": "Object-Oriented Programming", "lessons": ["Classes and Objects", "Inheritance", "Polymorphism", "Decorators"]},
             {"title": "Real-World Projects", "lessons": ["Web Scraper", "CLI Tool", "File Automation", "API Integration"]},
         ],
@@ -104,7 +107,10 @@ COURSES = [
         "instructor": "alex_morgan",
         "thumbnail_url": "https://images.unsplash.com/photo-1555099962-4199c345e5dd?w=800&q=80",
         "modules": [
-            {"title": "React Fundamentals", "lessons": ["Component Architecture", "State & Props", "Hooks Deep Dive", "Context API"]},
+            {"title": "React Fundamentals", "lessons": [
+                {"title": "Component Architecture", "video_url": "https://www.youtube.com/watch?v=c-QsfbznSXI"},
+                "State & Props", "Hooks Deep Dive", "Context API"
+            ]},
             {"title": "Django REST Framework", "lessons": ["Models & Serializers", "API Views", "Authentication", "Permissions"]},
             {"title": "Integration & Deployment", "lessons": ["Connecting Frontend & Backend", "Docker Setup", "AWS Deployment", "CI/CD Pipeline"]},
         ],
@@ -121,7 +127,10 @@ COURSES = [
         "instructor": "priya_sharma",
         "thumbnail_url": "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
         "modules": [
-            {"title": "Design Thinking", "lessons": ["Empathize Phase", "Define & Ideate", "Prototyping Basics", "Usability Testing"]},
+            {"title": "Design Thinking", "lessons": [
+                {"title": "Empathize Phase", "video_url": "https://www.youtube.com/watch?v=c9Wg6Cb_YlU"},
+                "Define & Ideate", "Prototyping Basics", "Usability Testing"
+            ]},
             {"title": "Figma Mastery", "lessons": ["Figma Interface Tour", "Auto Layout", "Components & Variants", "Interactive Prototypes"]},
         ],
     },
@@ -137,7 +146,10 @@ COURSES = [
         "instructor": "yuki_tanaka",
         "thumbnail_url": "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80",
         "modules": [
-            {"title": "ML Foundations", "lessons": ["Linear Regression", "Classification Algorithms", "Model Evaluation", "Feature Engineering"]},
+            {"title": "ML Foundations", "lessons": [
+                {"title": "Linear Regression", "video_url": "https://www.youtube.com/watch?v=i_LwzRVP7bg"},
+                "Classification Algorithms", "Model Evaluation", "Feature Engineering"
+            ]},
             {"title": "Deep Learning", "lessons": ["Neural Network Basics", "CNNs for Vision", "RNNs & LSTMs", "Transfer Learning"]},
             {"title": "NLP & Deployment", "lessons": ["Text Processing", "Transformers & BERT", "FastAPI Serving", "Docker + AWS SageMaker"]},
         ],
@@ -154,7 +166,10 @@ COURSES = [
         "instructor": "carlos_vega",
         "thumbnail_url": "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
         "modules": [
-            {"title": "Foundations of Strategy", "lessons": ["Porter's 5 Forces", "SWOT Analysis", "Business Model Canvas", "Value Proposition Design"]},
+            {"title": "Foundations of Strategy", "lessons": [
+                {"title": "Porter's 5 Forces", "video_url": "https://www.youtube.com/watch?v=fXQrCn4lW7E"},
+                "SWOT Analysis", "Business Model Canvas", "Value Proposition Design"
+            ]},
             {"title": "Building & Scaling", "lessons": ["Finding Product-Market Fit", "Fundraising 101", "Team Building", "Growth Hacking"]},
         ],
     },
@@ -170,7 +185,10 @@ COURSES = [
         "instructor": "sofia_bell",
         "thumbnail_url": "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&q=80",
         "modules": [
-            {"title": "Camera Fundamentals", "lessons": ["Understanding Exposure", "Aperture & Depth of Field", "Shutter Speed & Motion", "ISO & Noise"]},
+            {"title": "Camera Fundamentals", "lessons": [
+                {"title": "Understanding Exposure", "video_url": "https://www.youtube.com/watch?v=yhAmMUi2NmM"},
+                "Aperture & Depth of Field", "Shutter Speed & Motion", "ISO & Noise"
+            ]},
             {"title": "Composition & Lighting", "lessons": ["Rule of Thirds", "Golden Hour", "Studio Lighting Setup", "Natural Light Portraits"]},
             {"title": "Post-Processing", "lessons": ["Lightroom Workflow", "Color Grading", "Skin Retouching", "Exporting for Web & Print"]},
         ],
@@ -187,7 +205,10 @@ COURSES = [
         "instructor": "yuki_tanaka",
         "thumbnail_url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
         "modules": [
-            {"title": "Data Manipulation", "lessons": ["Pandas DataFrames", "Data Cleaning Techniques", "Merging & Grouping", "Time Series Analysis"]},
+            {"title": "Data Manipulation", "lessons": [
+                {"title": "Pandas DataFrames", "video_url": "https://www.youtube.com/watch?v=7eh4d6sabA0"},
+                "Data Cleaning Techniques", "Merging & Grouping", "Time Series Analysis"
+            ]},
             {"title": "Visualization", "lessons": ["Matplotlib Basics", "Seaborn Statistical Plots", "Interactive Plotly Charts", "Dashboard with Streamlit"]},
         ],
     },
@@ -203,7 +224,10 @@ COURSES = [
         "instructor": "carlos_vega",
         "thumbnail_url": "https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=800&q=80",
         "modules": [
-            {"title": "SEO Fundamentals", "lessons": ["Keyword Research", "On-Page SEO", "Link Building", "Technical SEO Audit"]},
+            {"title": "SEO Fundamentals", "lessons": [
+                {"title": "Keyword Research", "video_url": "https://www.youtube.com/watch?v=h95cQkEWBx0"},
+                "On-Page SEO", "Link Building", "Technical SEO Audit"
+            ]},
             {"title": "Paid Advertising", "lessons": ["Google Ads Setup", "Meta Ads Manager", "Retargeting Campaigns", "ROI & Attribution"]},
             {"title": "Content & Email", "lessons": ["Content Calendar Strategy", "Copywriting for Conversions", "Email Sequences", "Analytics with GA4"]},
         ],
@@ -220,7 +244,10 @@ COURSES = [
         "instructor": "alex_morgan",
         "thumbnail_url": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80",
         "modules": [
-            {"title": "Advanced Patterns", "lessons": ["Compound Components", "Render Props", "Custom Hooks", "Higher-Order Components"]},
+            {"title": "Advanced Patterns", "lessons": [
+                {"title": "Compound Components", "video_url": "https://www.youtube.com/watch?v=9Vuz4BbPkXc"},
+                "Render Props", "Custom Hooks", "Higher-Order Components"
+            ]},
             {"title": "Performance", "lessons": ["React.memo & useMemo", "Code Splitting", "Virtualization", "Bundle Analysis"]},
             {"title": "State Management", "lessons": ["Context at Scale", "Zustand", "React Query", "Optimistic Updates"]},
         ],
@@ -237,7 +264,10 @@ COURSES = [
         "instructor": "priya_sharma",
         "thumbnail_url": "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80",
         "modules": [
-            {"title": "Brand Strategy", "lessons": ["Brand Discovery Workshop", "Competitive Analysis", "Positioning & Differentiation", "Moodboarding"]},
+            {"title": "Brand Strategy", "lessons": [
+                {"title": "Brand Discovery Workshop", "video_url": "https://www.youtube.com/watch?v=y_2P5o_msuo"},
+                "Competitive Analysis", "Positioning & Differentiation", "Moodboarding"
+            ]},
             {"title": "Visual Identity", "lessons": ["Logo Design Process", "Typography System", "Color Palette", "Photography Style"]},
             {"title": "Style Guide Creation", "lessons": ["Brand Guidelines Structure", "Component Library", "Client Presentation", "Brand Rollout"]},
         ],
@@ -254,7 +284,10 @@ COURSES = [
         "instructor": "carlos_vega",
         "thumbnail_url": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
         "modules": [
-            {"title": "VC Fundamentals", "lessons": ["How VC Funds Work", "Deal Sourcing", "Due Diligence", "Cap Table Basics"]},
+            {"title": "VC Fundamentals", "lessons": [
+                {"title": "How VC Funds Work", "video_url": "https://www.youtube.com/watch?v=1qy1GX6gugw"},
+                "Deal Sourcing", "Due Diligence", "Cap Table Basics"
+            ]},
             {"title": "Valuation & Terms", "lessons": ["Pre-money vs Post-money", "Term Sheet Negotiation", "Dilution & Options", "SAFE vs Priced Rounds"]},
         ],
     },
@@ -270,7 +303,10 @@ COURSES = [
         "instructor": "sofia_bell",
         "thumbnail_url": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
         "modules": [
-            {"title": "Planning & Field Craft", "lessons": ["Location Scouting", "Golden Hour & Blue Hour", "Weather & Light Planning", "Gear for Landscapes"]},
+            {"title": "Planning & Field Craft", "lessons": [
+                {"title": "Location Scouting", "video_url": "https://www.youtube.com/watch?v=tQ9gPQAk8xY"},
+                "Golden Hour & Blue Hour", "Weather & Light Planning", "Gear for Landscapes"
+            ]},
             {"title": "Techniques", "lessons": ["Long Exposure Basics", "ND Filters", "Focus Stacking", "Panoramic Stitching"]},
             {"title": "Post-Processing", "lessons": ["RAW Processing Workflow", "Sky Replacement", "Dodging & Burning", "Signature Style Development"]},
         ],
@@ -431,11 +467,19 @@ class Command(BaseCommand):
                     title=mod_data["title"],
                     order=mod_idx + 1,
                 )
-                for les_idx, lesson_title in enumerate(mod_data.get("lessons", [])):
+                for les_idx, lesson_data in enumerate(mod_data.get("lessons", [])):
+                    # Support both plain string titles and dict with {title, video_url}
+                    if isinstance(lesson_data, str):
+                        lesson_title = lesson_data
+                        lesson_video_url = None
+                    else:
+                        lesson_title = lesson_data["title"]
+                        lesson_video_url = lesson_data.get("video_url")
                     Lesson.objects.create(
                         module=module,
                         title=lesson_title,
                         lesson_type="VIDEO",
+                        video_url=lesson_video_url,
                         duration_minutes=(les_idx + 1) * 12,
                         order=les_idx + 1,
                     )
