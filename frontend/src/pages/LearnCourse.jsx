@@ -517,7 +517,7 @@ export default function LearnCourse() {
               )}
 
               {/* No video/file placeholder */}
-              {!currentLesson.video_url && !currentLesson.file && (
+              {!currentLesson.video_url && !currentLesson.file && !currentLesson.content && (
                 <div style={{ padding: '48px 32px', background: 'var(--surface)', borderRadius: 'var(--radius-lg)', textAlign: 'center', marginBottom: '32px' }}>
                   <div style={{ fontSize: '2rem', marginBottom: '12px' }}>📄</div>
                   <p style={{ color: 'var(--text-tertiary)' }}>This lesson has no media content. Use the navigation below to proceed.</p>
