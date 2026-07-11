@@ -172,6 +172,7 @@ STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='')
 PAYPAL_CLIENT_ID = env('PAYPAL_CLIENT_ID', default='')
 PAYPAL_CLIENT_SECRET = env('PAYPAL_CLIENT_SECRET', default='')
 PAYPAL_MODE = 'sandbox' if DEBUG else 'live'
+PAYPAL_CURRENCY = env('PAYPAL_CURRENCY', default='USD')
 
 # Frontend URL
 FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173').rstrip('/')

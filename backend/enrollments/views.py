@@ -111,6 +111,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         if Enrollment.objects.filter(student=request.user, course=course).exists():
             return Response({'error': 'Already enrolled'}, status=status.HTTP_400_BAD_REQUEST)
 
+        paypal_currency = getattr(settings, 'PAYPAL_CURRENCY', 'USD')
         payment = paypalrestsdk.Payment({
             "intent": "sale",
             "payer": {"payment_method": "paypal"},
@@ -124,13 +125,13 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                         "name": course.title,
                         "sku": str(course.id),
                         "price": str(course.price),
-                        "currency": "USD",
+                        "currency": paypal_currency,
                         "quantity": 1
                     }]
                 },
                 "amount": {
                     "total": str(course.price),
-                    "currency": "USD"
+                    "currency": paypal_currency
                 },
                 "description": f"Enrolling in {course.title}"
             }]

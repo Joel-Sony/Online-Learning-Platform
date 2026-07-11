@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import api, { apiBase } from '../api';
 
 /* ─── Helpers ─────────────────────────────────────────────────── */
@@ -535,7 +537,7 @@ export default function LearnCourse() {
                     </svg>
                     <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Lesson Notes</span>
                   </div>
-                  <div style={{
+                  <div className="lesson-content-markdown" style={{
                     fontSize: '1rem',
                     lineHeight: '1.8',
                     color: 'var(--text-secondary)',
@@ -543,9 +545,10 @@ export default function LearnCourse() {
                     border: '1px solid var(--border)',
                     borderRadius: 'var(--radius-lg)',
                     padding: '24px 28px',
-                    whiteSpace: 'pre-wrap',
                   }}>
-                    {currentLesson.content}
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {currentLesson.content}
+                    </ReactMarkdown>
                   </div>
                 </div>
               )}
