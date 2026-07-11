@@ -24,6 +24,9 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
     serializer_class = EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def perform_create(self, serializer):
+        serializer.save(student=self.request.user)
+
     def get_queryset(self):
         user = self.request.user
         if user.role == 'ADMIN':

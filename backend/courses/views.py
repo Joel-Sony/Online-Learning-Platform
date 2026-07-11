@@ -29,7 +29,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         return CourseSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'autocomplete']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated(), IsMentorOrReadOnly(), IsOwnerOrAdmin()]
 
@@ -154,6 +154,11 @@ class MentorSearchView(generics.ListAPIView):
 class QuizViewSet(viewsets.ModelViewSet):
     queryset = Quiz.objects.all()
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action == 'submit_attempt':
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated(), IsOwnerOrAdmin()]
 
     def get_serializer_class(self):
         user = self.request.user

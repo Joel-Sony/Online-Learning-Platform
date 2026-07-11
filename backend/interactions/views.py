@@ -1,6 +1,7 @@
 from django.db.models import Avg, Count
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -16,8 +17,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         course = serializer.validated_data['course']
         if not Enrollment.objects.filter(student=self.request.user, course=course).exists():
-            from rest_framework.exceptions import ValidationError
             raise ValidationError("Only enrolled students can review this course.")
+        if Review.objects.filter(student=self.request.user, course=course).exists():
+            raise ValidationError("You have already reviewed this course.")
         serializer.save(student=self.request.user)
 
     @action(detail=False, methods=['get'])
