@@ -38,7 +38,7 @@ IMAGE_MAP = {
     "email": "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=800&q=80",
     "figma": "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&q=80",
     "finance": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
-    "functions": "https://images.unsplash.com/photo-1515879218367-8466d910y1984?w=800&q=80",
+    "functions": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80",
     "growth": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80",
     "handshake": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
     "hooks": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80",
@@ -64,7 +64,7 @@ IMAGE_MAP = {
 
 FALLBACK_IMAGES = [
     "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80",
-    "https://images.unsplash.com/photo-1515879218367-8466d910y1984?w=800&q=80",
+    "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80",
     "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
     "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80",
     "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80",

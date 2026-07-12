@@ -181,7 +181,7 @@ for i in range(5):
     print(i)  # Prints 0, 1, 3, 4
 ```""",
 
-    "Functions & Scope": """![Functions](https://images.unsplash.com/photo-1515879218367-8466d910y1984?w=600&q=80)
+    "Functions & Scope": """![Functions](https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&q=80)
 
 Functions are **reusable blocks of code** that perform a specific task. They help you organize code, avoid repetition, and manage complexity.
 
