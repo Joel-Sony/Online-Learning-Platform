@@ -81,11 +81,9 @@ function Navbar() {
           </Link>
 
           {isAuthenticated && role === 'STUDENT' && (
-            <>
-              <Link to="/learning" className={`nav-link ${isActive('/learning') ? 'active' : ''}`}>
-                My Learning
-              </Link>
-            </>
+            <Link to="/learning" className={`nav-link ${isActive('/learning') ? 'active' : ''}`}>
+              My Learning
+            </Link>
           )}
 
           {isAuthenticated && role === 'MENTOR' && (
@@ -100,6 +98,12 @@ function Navbar() {
                 Announce
               </Link>
             </>
+          )}
+
+          {isAuthenticated && role === 'ADMIN' && (
+            <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
+              Admin
+            </Link>
           )}
         </div>
 

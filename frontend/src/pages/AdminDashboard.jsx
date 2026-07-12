@@ -68,35 +68,40 @@ function AdminDashboard() {
     };
 
     const renderReports = () => {
-        if (!data?.stats) return null;
+        const stats = data?.stats;
+        if (!stats) return <p className="mono" style={{ color: 'var(--text-muted)' }}>No report data available.</p>;
+        const courses = Array.isArray(data?.top_courses) ? data.top_courses : [];
+        const mentors = Array.isArray(data?.top_mentors) ? data.top_mentors : [];
         return (
             <div>
                 <h2>Platform Reports</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-                    <div className="card"><h3>Total Users</h3><p>{data.stats.total_users}</p></div>
-                    <div className="card"><h3>Total Mentors</h3><p>{data.stats.total_mentors}</p></div>
-                    <div className="card"><h3>Total Students</h3><p>{data.stats.total_students}</p></div>
-                    <div className="card"><h3>Total Courses</h3><p>{data.stats.total_courses}</p></div>
-                    <div className="card"><h3>Total Enrollments</h3><p>{data.stats.total_enrollments}</p></div>
-                    <div className="card"><h3>Total Revenue</h3><p>${data.stats.total_revenue}</p></div>
+                    <div className="card"><h3>Total Users</h3><p>{stats.total_users}</p></div>
+                    <div className="card"><h3>Total Mentors</h3><p>{stats.total_mentors}</p></div>
+                    <div className="card"><h3>Total Students</h3><p>{stats.total_students}</p></div>
+                    <div className="card"><h3>Total Courses</h3><p>{stats.total_courses}</p></div>
+                    <div className="card"><h3>Total Enrollments</h3><p>{stats.total_enrollments}</p></div>
+                    <div className="card"><h3>Total Revenue</h3><p>${stats.total_revenue}</p></div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                     <div>
                         <h3>Top 5 Courses</h3>
-                        <ul>
-                            {data.top_courses.map(c => <li key={c.id}>{c.title} ({c.enrollment_count} students)</li>)}
-                        </ul>
+                        {courses.length > 0 ? (
+                            <ul>{courses.map(c => <li key={c.id}>{c.title} ({c.enrollment_count} students)</li>)}</ul>
+                        ) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No courses yet.</p>}
                     </div>
                     <div>
                         <h3>Top 5 Mentors</h3>
-                        <ul>
-                            {data.top_mentors.map(m => <li key={m.id}>{m.username} ({m.avg_rating.toFixed(1)} ⭐)</li>)}
-                        </ul>
+                        {mentors.length > 0 ? (
+                            <ul>{mentors.map(m => <li key={m.id}>{m.username} ({Number(m.avg_rating || 0).toFixed(1)} ⭐)</li>)}</ul>
+                        ) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No mentors yet.</p>}
                     </div>
                 </div>
             </div>
         );
     };
+
+    const list = (items) => Array.isArray(items) ? items : [];
 
     const renderUsers = () => (
         <table>
@@ -104,7 +109,7 @@ function AdminDashboard() {
                 <tr><th>ID</th><th>Username</th><th>Role</th><th>Active</th><th>Actions</th></tr>
             </thead>
             <tbody>
-                {data?.map(user => (
+                {list(data).length > 0 ? list(data).map(user => (
                     <tr key={user.id}>
                         <td>{user.id}</td>
                         <td>{user.username}</td>
@@ -117,7 +122,7 @@ function AdminDashboard() {
                             <button onClick={() => handleAction(`/admin/users/${user.id}/`, 'delete')} style={{ color: 'red' }}>Delete</button>
                         </td>
                     </tr>
-                ))}
+                )) : <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No users found.</td></tr>}
             </tbody>
         </table>
     );
@@ -128,7 +133,7 @@ function AdminDashboard() {
                 <tr><th>Username</th><th>Email</th><th>Actions</th></tr>
             </thead>
             <tbody>
-                {data?.map(mentor => (
+                {list(data).length > 0 ? list(data).map(mentor => (
                     <tr key={mentor.id}>
                         <td>{mentor.username}</td>
                         <td>{mentor.email}</td>
@@ -137,7 +142,7 @@ function AdminDashboard() {
                             <button onClick={() => handleAction(`/admin/mentors/${mentor.id}/reject/`)} style={{ color: 'red' }}>Reject</button>
                         </td>
                     </tr>
-                ))}
+                )) : <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No pending mentors.</td></tr>}
             </tbody>
         </table>
     );
@@ -148,7 +153,7 @@ function AdminDashboard() {
                 <tr><th>Title</th><th>Mentor</th><th>Category</th><th>Actions</th></tr>
             </thead>
             <tbody>
-                {data?.map(course => (
+                {list(data).length > 0 ? list(data).map(course => (
                     <tr key={course.id}>
                         <td>{course.title}</td>
                         <td>{course.mentor_name}</td>
@@ -161,7 +166,7 @@ function AdminDashboard() {
                             }} style={{ color: 'red' }}>Reject</button>
                         </td>
                     </tr>
-                ))}
+                )) : <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No pending courses.</td></tr>}
             </tbody>
         </table>
     );
@@ -172,20 +177,24 @@ function AdminDashboard() {
             <table>
                 <thead><tr><th>Review</th><th>Student</th><th>Actions</th></tr></thead>
                 <tbody>
-                    {data?.reviews?.map(r => (
+                    {list(data?.reviews).length > 0 ? list(data.reviews).map(r => (
                         <tr key={r.id}>
                             <td>{r.review_text}</td>
                             <td>{r.student_name}</td>
                             <td><button onClick={() => handleAction(`/admin/reviews/${r.id}/delete_review/`, 'delete')}>Delete</button></td>
                         </tr>
-                    ))}
+                    )) : <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No flagged reviews.</td></tr>}
                 </tbody>
             </table>
             <h3 style={{ marginTop: '2rem' }}>Flagged Q&A</h3>
             <h4>Questions</h4>
-            {data?.questions?.map(q => <div key={q.id}>{q.title} <button onClick={() => handleAction(`/admin/qna/${q.id}/delete_question/`, 'delete')}>Delete</button></div>)}
+            {list(data?.questions).length > 0 ? list(data.questions).map(q => (
+                <div key={q.id}>{q.title} <button onClick={() => handleAction(`/admin/qna/${q.id}/delete_question/`, 'delete')}>Delete</button></div>
+            )) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No flagged questions.</p>}
             <h4>Replies</h4>
-            {data?.replies?.map(r => <div key={r.id}>{r.body} <button onClick={() => handleAction(`/admin/qna/${r.id}/delete_reply/`, 'delete')}>Delete</button></div>)}
+            {list(data?.replies).length > 0 ? list(data.replies).map(r => (
+                <div key={r.id}>{r.body} <button onClick={() => handleAction(`/admin/qna/${r.id}/delete_reply/`, 'delete')}>Delete</button></div>
+            )) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No flagged replies.</p>}
         </div>
     );
 
@@ -195,7 +204,7 @@ function AdminDashboard() {
                 <tr><th>User</th><th>Course</th><th>Amount</th><th>Provider</th><th>Actions</th></tr>
             </thead>
             <tbody>
-                {data?.map(payment => (
+                {list(data).length > 0 ? list(data).map(payment => (
                     <tr key={payment.id}>
                         <td>{payment.user_name}</td>
                         <td>{payment.course_title}</td>
@@ -209,7 +218,7 @@ function AdminDashboard() {
                             }} style={{ color: 'red' }}>Reject</button>
                         </td>
                     </tr>
-                ))}
+                )) : <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No refund requests.</td></tr>}
             </tbody>
         </table>
     );
