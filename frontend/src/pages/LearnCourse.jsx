@@ -573,8 +573,28 @@ export default function LearnCourse() {
                 </div>
               )}
 
+              {/* Bottom Mark Complete */}
+              {currentLesson && (
+                <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '32px', borderTop: '1px solid var(--border)', marginBottom: '24px' }}>
+                  {completedLessons[currentLesson.id] ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--success)', fontWeight: 600 }}>
+                      <CheckIcon /> Completed
+                    </span>
+                  ) : (
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleMarkComplete}
+                      disabled={markingComplete}
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 32px' }}
+                    >
+                      {markingComplete ? 'Saving…' : '✓ Mark Complete'}
+                    </button>
+                  )}
+                </div>
+              )}
+
               {/* Prev / Next navigation */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0', borderTop: '1px solid var(--border)' }}>
                 {prevLesson ? (
                   <button onClick={() => goToLesson(prevLesson)} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>

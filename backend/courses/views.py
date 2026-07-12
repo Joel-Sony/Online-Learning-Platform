@@ -2,6 +2,7 @@ from django.db.models import Avg, Count, Q, Sum
 from rest_framework import viewsets, permissions, filters, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import get_user_model
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,14 +13,20 @@ from .serializers import (
 )
 from .permissions import IsMentorOrReadOnly, IsOwnerOrAdmin
 from .filters import CourseFilter
+from .search import CourseSearchBackend
 from users.serializers import MentorSearchSerializer
 
 User = get_user_model()
 
+class CoursePagination(PageNumberPagination):
+    page_size = 12
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 class CourseViewSet(viewsets.ModelViewSet):
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = CoursePagination
+    filter_backends = [DjangoFilterBackend, CourseSearchBackend, filters.OrderingFilter]
     filterset_class = CourseFilter
-    search_fields = ['title', 'description', 'mentor__username']
     ordering_fields = ['price', 'created_at', 'enrollment_count', 'avg_rating']
     ordering = ['-created_at']
 
@@ -69,16 +76,27 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
     def autocomplete(self, request):
-        """Returns up to 7 course title suggestions for a search query."""
+        """Returns up to 7 course title suggestions using full-text search."""
         q = request.query_params.get('q', '').strip()
         if not q or len(q) < 2:
             return Response([])
-        results = (
-            Course.objects
-            .filter(is_published=True)
-            .filter(Q(title__icontains=q) | Q(tags__icontains=q) | Q(category__icontains=q))
-            .values('id', 'title', 'category')[:7]
-        )
+
+        from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank, TrigramSimilarity
+        from django.db.models import Q
+
+        base = Course.objects.filter(is_published=True)
+
+        search_query = SearchQuery(q, config='english')
+        vector = SearchVector('title', weight='A') + SearchVector('tags', weight='B') + SearchVector('category', weight='C')
+        ranked = base.annotate(rank=SearchRank(vector, search_query)).filter(rank__gte=0.01)
+        if ranked.exists():
+            results = ranked.values('id', 'title', 'category').order_by('-rank')[:7]
+        else:
+            trigram = base.annotate(similarity=TrigramSimilarity('title', q)).filter(similarity__gt=0.1)
+            if trigram.exists():
+                results = trigram.values('id', 'title', 'category').order_by('-similarity')[:7]
+            else:
+                results = base.filter(Q(title__icontains=q) | Q(tags__icontains=q) | Q(category__icontains=q)).values('id', 'title', 'category')[:7]
         return Response(list(results))
 
     def get_queryset(self):

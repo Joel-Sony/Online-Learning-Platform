@@ -17,8 +17,9 @@ function CreateAnnouncement() {
   const fetchData = async () => {
     try {
       // Fetch mentor's courses
-      const coursesRes = await api.get('/courses/');
-      const mentorCourses = coursesRes.data.filter(c => c.mentor_name === localStorage.getItem('username'));
+      const coursesRes = await api.get('/courses/', { params: { page_size: 100 } });
+      const list = coursesRes.data.results || coursesRes.data;
+      const mentorCourses = list.filter(c => c.mentor_name === localStorage.getItem('username'));
       setCourses(mentorCourses);
 
       // Fetch all announcements and filter by those belonging to mentor's courses

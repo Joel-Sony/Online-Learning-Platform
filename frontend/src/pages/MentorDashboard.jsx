@@ -11,9 +11,9 @@ function MentorDashboard() {
   }, []);
 
   const fetchCourses = () => {
-    api.get('/courses/')
+    api.get('/courses/', { params: { page_size: 100 } })
       .then(res => {
-        setCourses(res.data);
+        setCourses(res.data.results || res.data);
         setLoading(false);
       })
       .catch(err => {

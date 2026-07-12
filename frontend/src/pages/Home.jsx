@@ -45,12 +45,12 @@ function Home() {
 
   useEffect(() => {
     Promise.all([
-      api.get('/courses/', { params: { ordering: '-created_at' } }),
-      api.get('/courses/', { params: { ordering: '-avg_rating' } }),
+      api.get('/courses/', { params: { ordering: '-created_at', page_size: 8 } }),
+      api.get('/courses/', { params: { ordering: '-avg_rating', page_size: 6 } }),
     ])
       .then(([newRes, ratedRes]) => {
-        setCourses(newRes.data.slice(0, 8));
-        setTopRated(ratedRes.data.slice(0, 6));
+        setCourses(newRes.data.results || newRes.data);
+        setTopRated(ratedRes.data.results || ratedRes.data);
         setLoading(false);
       })
       .catch(() => setLoading(false));

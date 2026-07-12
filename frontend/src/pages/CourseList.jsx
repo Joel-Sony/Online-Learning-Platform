@@ -261,6 +261,7 @@ function EmptyState({ query, onClear }) {
 function CourseList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [courses, setCourses] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const [suggestions, setSuggestions] = useState([]);
@@ -270,14 +271,27 @@ function CourseList() {
   const fetchCourses = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get('/courses/', { params: Object.fromEntries(searchParams) });
-      setCourses(res.data);
+      const params = Object.fromEntries(searchParams);
+      if (!params.page) params.page = 1;
+      const res = await api.get('/courses/', { params });
+      setCourses(res.data.results);
+      setTotalCount(res.data.count);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   }, [searchParams]);
+
+  const goToPage = (page) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('page', page);
+    setSearchParams(newParams);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const currentPage = parseInt(searchParams.get('page')) || 1;
+  const totalPages = Math.ceil(totalCount / 12);
 
   useEffect(() => { fetchCourses(); }, [fetchCourses]);
 
@@ -333,7 +347,7 @@ function CourseList() {
               {pageTitle}
             </h1>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
-              {loading ? '' : `${courses.length} course${courses.length !== 1 ? 's' : ''}`}
+              {loading ? '' : `${totalCount} course${totalCount !== 1 ? 's' : ''}`}
             </span>
           </div>
 
@@ -404,6 +418,33 @@ function CourseList() {
               : <EmptyState query={query} onClear={() => setSearchParams({})} />
           }
         </div>
+
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '32px' }}>
+            <button
+              className="btn btn-sm btn-secondary"
+              disabled={currentPage <= 1}
+              onClick={() => goToPage(currentPage - 1)}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+              Previous
+            </button>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', padding: '0 8px' }}>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              className="btn btn-sm btn-secondary"
+              disabled={currentPage >= totalPages}
+              onClick={() => goToPage(currentPage + 1)}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+            >
+              Next
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
