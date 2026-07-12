@@ -17,7 +17,7 @@ class ProgressViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.role == 'ADMIN':
-            return LessonProgress.objects.all()
+            return LessonProgress.objects.none()
         if user.role == 'MENTOR':
             return LessonProgress.objects.filter(course__mentor=user)
         return LessonProgress.objects.filter(student=user)
@@ -27,6 +27,8 @@ class ProgressViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def mark_complete(self, request):
+        if request.user.role == 'ADMIN':
+            return Response({'error': 'Admins cannot mark lessons complete'}, status=status.HTTP_403_FORBIDDEN)
         lesson_id = request.data.get('lesson_id')
         lesson = get_object_or_404(Lesson, id=lesson_id)
         course = lesson.module.course
@@ -66,6 +68,8 @@ class ProgressViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def course_progress(self, request):
+        if request.user.role == 'ADMIN':
+            return Response({'total_lessons': 0, 'completed_lessons': 0, 'remaining_lessons': 0, 'progress_percentage': 0})
         course_id = request.query_params.get('course_id')
         course = get_object_or_404(Course, id=course_id)
         

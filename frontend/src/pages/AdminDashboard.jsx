@@ -6,14 +6,15 @@ function AdminDashboard() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [userSearch, setUserSearch] = useState('');
 
     const sections = [
-        { id: 'reports', label: 'Reports' },
-        { id: 'users', label: 'Users' },
-        { id: 'mentors', label: 'Mentor Approvals' },
-        { id: 'courses', label: 'Course Approvals' },
-        { id: 'moderation', label: 'Moderation' },
-        { id: 'refunds', label: 'Refunds' },
+        { id: 'reports', label: 'Reports', icon: '📊' },
+        { id: 'users', label: 'Users', icon: '👥' },
+        { id: 'mentors', label: 'Mentor Approvals', icon: '✅' },
+        { id: 'courses', label: 'Course Approvals', icon: '📚' },
+        { id: 'moderation', label: 'Moderation', icon: '🚩' },
+        { id: 'refunds', label: 'Refunds', icon: '💰' },
     ];
 
     useEffect(() => {
@@ -67,33 +68,94 @@ function AdminDashboard() {
         }
     };
 
+    const list = (items) => Array.isArray(items) ? items : [];
+
     const renderReports = () => {
         const stats = data?.stats;
         if (!stats) return <p className="mono" style={{ color: 'var(--text-muted)' }}>No report data available.</p>;
-        const courses = Array.isArray(data?.top_courses) ? data.top_courses : [];
-        const mentors = Array.isArray(data?.top_mentors) ? data.top_mentors : [];
+        const courses = list(data?.top_courses);
+        const mentors = list(data?.top_mentors);
+
+        const statCards = [
+            { label: 'Total Users', value: stats.total_users, color: '#4f46e5' },
+            { label: 'Total Mentors', value: stats.total_mentors, color: '#0891b2' },
+            { label: 'Total Students', value: stats.total_students, color: '#059669' },
+            { label: 'Total Courses', value: stats.total_courses, color: '#d97706' },
+            { label: 'Total Enrollments', value: stats.total_enrollments, color: '#dc2626' },
+            { label: 'Total Revenue', value: `$${stats.total_revenue}`, color: '#7c3aed' },
+        ];
+
         return (
             <div>
-                <h2>Platform Reports</h2>
+                <h2 style={{ marginBottom: '1.5rem' }}>Platform Reports</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-                    <div className="card"><h3>Total Users</h3><p>{stats.total_users}</p></div>
-                    <div className="card"><h3>Total Mentors</h3><p>{stats.total_mentors}</p></div>
-                    <div className="card"><h3>Total Students</h3><p>{stats.total_students}</p></div>
-                    <div className="card"><h3>Total Courses</h3><p>{stats.total_courses}</p></div>
-                    <div className="card"><h3>Total Enrollments</h3><p>{stats.total_enrollments}</p></div>
-                    <div className="card"><h3>Total Revenue</h3><p>${stats.total_revenue}</p></div>
+                    {statCards.map(s => (
+                        <div key={s.label} style={{
+                            background: 'var(--bg)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 'var(--radius-lg)',
+                            padding: '1.25rem',
+                            boxShadow: 'var(--shadow-sm)',
+                        }}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>{s.label}</div>
+                            <div style={{ fontSize: '1.75rem', fontWeight: 700, color: s.color }}>{s.value}</div>
+                        </div>
+                    ))}
                 </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                    <div>
-                        <h3>Top 5 Courses</h3>
+                    <div style={{
+                        background: 'var(--bg)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius-lg)',
+                        padding: '1.25rem',
+                    }}>
+                        <h3 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Top 5 Courses</h3>
                         {courses.length > 0 ? (
-                            <ul>{courses.map(c => <li key={c.id}>{c.title} ({c.enrollment_count} students)</li>)}</ul>
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                {courses.map((c, i) => (
+                                    <li key={c.id} style={{
+                                        display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                        padding: '0.6rem 0', borderBottom: i < courses.length - 1 ? '1px solid var(--border)' : 'none',
+                                    }}>
+                                        <span style={{
+                                            width: '24px', height: '24px', borderRadius: '50%',
+                                            background: 'var(--accent-light)', color: 'var(--accent)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: '0.7rem', fontWeight: 600, flexShrink: 0,
+                                        }}>{i + 1}</span>
+                                        <span style={{ flex: 1, fontSize: '0.85rem' }}>{c.title}</span>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{c.enrollment_count} enrolled</span>
+                                    </li>
+                                ))}
+                            </ul>
                         ) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No courses yet.</p>}
                     </div>
-                    <div>
-                        <h3>Top 5 Mentors</h3>
+                    <div style={{
+                        background: 'var(--bg)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius-lg)',
+                        padding: '1.25rem',
+                    }}>
+                        <h3 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Top 5 Mentors</h3>
                         {mentors.length > 0 ? (
-                            <ul>{mentors.map(m => <li key={m.id}>{m.username} ({Number(m.avg_rating || 0).toFixed(1)} ⭐)</li>)}</ul>
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                {mentors.map((m, i) => (
+                                    <li key={m.id} style={{
+                                        display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                        padding: '0.6rem 0', borderBottom: i < mentors.length - 1 ? '1px solid var(--border)' : 'none',
+                                    }}>
+                                        <span style={{
+                                            width: '24px', height: '24px', borderRadius: '50%',
+                                            background: '#fef3c7', color: '#d97706',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: '0.7rem', fontWeight: 600, flexShrink: 0,
+                                        }}>{i + 1}</span>
+                                        <span style={{ flex: 1, fontSize: '0.85rem' }}>{m.username}</span>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{Number(m.avg_rating || 0).toFixed(1)} ⭐</span>
+                                    </li>
+                                ))}
+                            </ul>
                         ) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No mentors yet.</p>}
                     </div>
                 </div>
@@ -101,150 +163,365 @@ function AdminDashboard() {
         );
     };
 
-    const list = (items) => Array.isArray(items) ? items : [];
+    const tableStyle = {
+        width: '100%',
+        borderCollapse: 'collapse',
+        background: 'var(--bg)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)',
+        overflow: 'hidden',
+    };
 
-    const renderUsers = () => (
-        <table>
-            <thead>
-                <tr><th>ID</th><th>Username</th><th>Role</th><th>Active</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-                {list(data).length > 0 ? list(data).map(user => (
-                    <tr key={user.id}>
-                        <td>{user.id}</td>
-                        <td>{user.username}</td>
-                        <td>{user.role}</td>
-                        <td>{user.is_active ? 'Yes' : 'No'}</td>
-                        <td>
-                            <button onClick={() => handleAction(`/admin/users/${user.id}/ban/`)}>
-                                {user.is_active ? 'Ban' : 'Unban'}
-                            </button>
-                            <button onClick={() => handleAction(`/admin/users/${user.id}/`, 'delete')} style={{ color: 'red' }}>Delete</button>
-                        </td>
-                    </tr>
-                )) : <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No users found.</td></tr>}
-            </tbody>
-        </table>
+    const thStyle = {
+        textAlign: 'left',
+        padding: '0.75rem 1rem',
+        fontSize: '0.75rem',
+        fontWeight: 600,
+        color: 'var(--text-tertiary)',
+        textTransform: 'uppercase',
+        letterSpacing: '0.06em',
+        background: 'var(--surface)',
+        borderBottom: '1px solid var(--border-strong)',
+    };
+
+    const tdStyle = {
+        padding: '0.7rem 1rem',
+        fontSize: '0.85rem',
+        color: 'var(--text-secondary)',
+        borderBottom: '1px solid var(--border)',
+    };
+
+    const badge = (text, variant) => {
+        const colors = {
+            success: { bg: '#f0fdf4', color: '#16a34a' },
+            danger: { bg: '#fef2f2', color: '#dc2626' },
+            warning: { bg: '#fffbeb', color: '#d97706' },
+            info: { bg: '#eff6ff', color: '#2563eb' },
+        };
+        const c = colors[variant] || colors.info;
+        return (
+            <span style={{
+                display: 'inline-block',
+                padding: '2px 10px',
+                borderRadius: 'var(--radius-pill)',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                background: c.bg,
+                color: c.color,
+            }}>{text}</span>
+        );
+    };
+
+    const actionBtn = (label, onClick, variant = 'secondary') => (
+        <button
+            onClick={onClick}
+            className={`btn btn-sm ${variant === 'danger' ? 'btn-secondary' : variant === 'primary' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{
+                marginRight: '6px',
+                fontSize: '0.72rem',
+                padding: '4px 12px',
+                ...(variant === 'danger' ? { color: '#dc2626', borderColor: '#fca5a5' } : {}),
+            }}
+        >
+            {label}
+        </button>
     );
 
+    const renderUsers = () => {
+        const users = list(data);
+        const filtered = userSearch ? users.filter(u =>
+            u.username.toLowerCase().includes(userSearch.toLowerCase()) ||
+            u.email?.toLowerCase().includes(userSearch.toLowerCase())
+        ) : users;
+
+        return (
+            <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h2 style={{ margin: 0 }}>Users</h2>
+                    <input
+                        type="text"
+                        placeholder="Search by username or email..."
+                        value={userSearch}
+                        onChange={e => setUserSearch(e.target.value)}
+                        className="form-input"
+                        style={{ maxWidth: '300px', fontSize: '0.85rem' }}
+                    />
+                </div>
+                <table style={tableStyle}>
+                    <thead>
+                        <tr>
+                            <th style={thStyle}>ID</th>
+                            <th style={thStyle}>Username</th>
+                            <th style={thStyle}>Role</th>
+                            <th style={thStyle}>Status</th>
+                            <th style={thStyle}>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filtered.length > 0 ? filtered.map(user => (
+                            <tr key={user.id} style={{ transition: 'background 0.1s' }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-subtle)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            >
+                                <td style={tdStyle}>{user.id}</td>
+                                <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-primary)' }}>{user.username}</td>
+                                <td style={tdStyle}>{badge(user.role, user.role === 'ADMIN' ? 'info' : user.role === 'MENTOR' ? 'warning' : 'success')}</td>
+                                <td style={tdStyle}>{user.is_active ? badge('Active', 'success') : badge('Banned', 'danger')}</td>
+                                <td style={tdStyle}>
+                                    {actionBtn(user.is_active ? 'Ban' : 'Unban', () => handleAction(`/admin/users/${user.id}/ban/`), user.is_active ? 'danger' : 'secondary')}
+                                    {actionBtn('Delete', () => handleAction(`/admin/users/${user.id}/`, 'delete'), 'danger')}
+                                </td>
+                            </tr>
+                        )) : (
+                            <tr>
+                                <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                                    {userSearch ? 'No users match your search.' : 'No users found.'}
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
+
     const renderMentors = () => (
-        <table>
-            <thead>
-                <tr><th>Username</th><th>Email</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-                {list(data).length > 0 ? list(data).map(mentor => (
-                    <tr key={mentor.id}>
-                        <td>{mentor.username}</td>
-                        <td>{mentor.email}</td>
-                        <td>
-                            <button onClick={() => handleAction(`/admin/mentors/${mentor.id}/approve/`)}>Approve</button>
-                            <button onClick={() => handleAction(`/admin/mentors/${mentor.id}/reject/`)} style={{ color: 'red' }}>Reject</button>
-                        </td>
+        <div>
+            <h2 style={{ marginBottom: '1rem' }}>Mentor Approvals</h2>
+            <table style={tableStyle}>
+                <thead>
+                    <tr>
+                        <th style={thStyle}>Username</th>
+                        <th style={thStyle}>Email</th>
+                        <th style={thStyle}>Actions</th>
                     </tr>
-                )) : <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No pending mentors.</td></tr>}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {list(data).length > 0 ? list(data).map(mentor => (
+                        <tr key={mentor.id}
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-subtle)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                            <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-primary)' }}>{mentor.username}</td>
+                            <td style={tdStyle}>{mentor.email}</td>
+                            <td style={tdStyle}>
+                                {actionBtn('Approve', () => handleAction(`/admin/mentors/${mentor.id}/approve/`), 'primary')}
+                                {actionBtn('Reject', () => handleAction(`/admin/mentors/${mentor.id}/reject/`), 'danger')}
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No pending mentor approvals.</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
     );
 
     const renderCourses = () => (
-        <table>
-            <thead>
-                <tr><th>Title</th><th>Mentor</th><th>Category</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-                {list(data).length > 0 ? list(data).map(course => (
-                    <tr key={course.id}>
-                        <td>{course.title}</td>
-                        <td>{course.mentor_name}</td>
-                        <td>{course.category}</td>
-                        <td>
-                            <button onClick={() => handleAction(`/admin/courses/approval/${course.id}/approve/`)}>Approve</button>
-                            <button onClick={() => {
-                                const reason = prompt('Reason for rejection?');
-                                if (reason) handleAction(`/admin/courses/approval/${course.id}/reject/`, 'post', { reason });
-                            }} style={{ color: 'red' }}>Reject</button>
-                        </td>
+        <div>
+            <h2 style={{ marginBottom: '1rem' }}>Course Approvals</h2>
+            <table style={tableStyle}>
+                <thead>
+                    <tr>
+                        <th style={thStyle}>Title</th>
+                        <th style={thStyle}>Mentor</th>
+                        <th style={thStyle}>Category</th>
+                        <th style={thStyle}>Actions</th>
                     </tr>
-                )) : <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No pending courses.</td></tr>}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {list(data).length > 0 ? list(data).map(course => (
+                        <tr key={course.id}
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-subtle)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                            <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-primary)' }}>{course.title}</td>
+                            <td style={tdStyle}>{course.mentor_name}</td>
+                            <td style={tdStyle}>{badge(course.category, 'warning')}</td>
+                            <td style={tdStyle}>
+                                {actionBtn('Approve', () => handleAction(`/admin/courses/approval/${course.id}/approve/`), 'primary')}
+                                {actionBtn('Reject', () => {
+                                    const reason = prompt('Reason for rejection?');
+                                    if (reason) handleAction(`/admin/courses/approval/${course.id}/reject/`, 'post', { reason });
+                                }, 'danger')}
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No pending course approvals.</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
     );
 
     const renderModeration = () => (
         <div>
-            <h3>Flagged Reviews</h3>
-            <table>
-                <thead><tr><th>Review</th><th>Student</th><th>Actions</th></tr></thead>
+            <h2 style={{ marginBottom: '1rem' }}>Moderation</h2>
+
+            <h3 style={{ fontSize: '0.9rem', marginBottom: '0.75rem', color: 'var(--text-primary)' }}>🚩 Flagged Reviews</h3>
+            <table style={tableStyle}>
+                <thead>
+                    <tr>
+                        <th style={thStyle}>Review</th>
+                        <th style={thStyle}>Student</th>
+                        <th style={thStyle}>Actions</th>
+                    </tr>
+                </thead>
                 <tbody>
                     {list(data?.reviews).length > 0 ? list(data.reviews).map(r => (
-                        <tr key={r.id}>
-                            <td>{r.review_text}</td>
-                            <td>{r.student_name}</td>
-                            <td><button onClick={() => handleAction(`/admin/reviews/${r.id}/delete_review/`, 'delete')}>Delete</button></td>
+                        <tr key={r.id}
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-subtle)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                            <td style={tdStyle}>{r.review_text}</td>
+                            <td style={tdStyle}>{r.student_name}</td>
+                            <td style={tdStyle}>{actionBtn('Delete', () => handleAction(`/admin/reviews/${r.id}/delete_review/`, 'delete'), 'danger')}</td>
                         </tr>
-                    )) : <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No flagged reviews.</td></tr>}
+                    )) : (
+                        <tr>
+                            <td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No flagged reviews.</td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
-            <h3 style={{ marginTop: '2rem' }}>Flagged Q&A</h3>
-            <h4>Questions</h4>
-            {list(data?.questions).length > 0 ? list(data.questions).map(q => (
-                <div key={q.id}>{q.title} <button onClick={() => handleAction(`/admin/qna/${q.id}/delete_question/`, 'delete')}>Delete</button></div>
-            )) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No flagged questions.</p>}
-            <h4>Replies</h4>
-            {list(data?.replies).length > 0 ? list(data.replies).map(r => (
-                <div key={r.id}>{r.body} <button onClick={() => handleAction(`/admin/qna/${r.id}/delete_reply/`, 'delete')}>Delete</button></div>
-            )) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No flagged replies.</p>}
+
+            <h3 style={{ fontSize: '0.9rem', margin: '1.5rem 0 0.75rem', color: 'var(--text-primary)' }}>🚩 Flagged Q&A</h3>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ flex: 1, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1rem' }}>
+                    <h4 style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Questions</h4>
+                    {list(data?.questions).length > 0 ? list(data.questions).map(q => (
+                        <div key={q.id} style={{
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            padding: '0.5rem 0', borderBottom: '1px solid var(--border)',
+                        }}>
+                            <span style={{ fontSize: '0.85rem' }}>{q.title}</span>
+                            {actionBtn('Delete', () => handleAction(`/admin/qna/${q.id}/delete_question/`, 'delete'), 'danger')}
+                        </div>
+                    )) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No flagged questions.</p>}
+                </div>
+                <div style={{ flex: 1, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1rem' }}>
+                    <h4 style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Replies</h4>
+                    {list(data?.replies).length > 0 ? list(data.replies).map(r => (
+                        <div key={r.id} style={{
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            padding: '0.5rem 0', borderBottom: '1px solid var(--border)',
+                        }}>
+                            <span style={{ fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '300px' }}>{r.body}</span>
+                            {actionBtn('Delete', () => handleAction(`/admin/qna/${r.id}/delete_reply/`, 'delete'), 'danger')}
+                        </div>
+                    )) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No flagged replies.</p>}
+                </div>
+            </div>
         </div>
     );
 
     const renderRefunds = () => (
-        <table>
-            <thead>
-                <tr><th>User</th><th>Course</th><th>Amount</th><th>Provider</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-                {list(data).length > 0 ? list(data).map(payment => (
-                    <tr key={payment.id}>
-                        <td>{payment.user_name}</td>
-                        <td>{payment.course_title}</td>
-                        <td>${payment.amount}</td>
-                        <td>{payment.provider}</td>
-                        <td>
-                            <button onClick={() => handleAction(`/admin/refunds/${payment.id}/approve/`)}>Approve</button>
-                            <button onClick={() => {
-                                const reason = prompt('Reason for rejection?');
-                                if (reason) handleAction(`/admin/refunds/${payment.id}/reject/`, 'post', { reason });
-                            }} style={{ color: 'red' }}>Reject</button>
-                        </td>
+        <div>
+            <h2 style={{ marginBottom: '1rem' }}>Refund Requests</h2>
+            <table style={tableStyle}>
+                <thead>
+                    <tr>
+                        <th style={thStyle}>User</th>
+                        <th style={thStyle}>Course</th>
+                        <th style={thStyle}>Amount</th>
+                        <th style={thStyle}>Provider</th>
+                        <th style={thStyle}>Actions</th>
                     </tr>
-                )) : <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No refund requests.</td></tr>}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {list(data).length > 0 ? list(data).map(payment => (
+                        <tr key={payment.id}
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-subtle)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                            <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-primary)' }}>{payment.user_name}</td>
+                            <td style={tdStyle}>{payment.course_title}</td>
+                            <td style={tdStyle}><span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>${payment.amount}</span></td>
+                            <td style={tdStyle}>{badge(payment.provider, payment.provider === 'STRIPE' ? 'info' : 'warning')}</td>
+                            <td style={tdStyle}>
+                                {actionBtn('Approve', () => handleAction(`/admin/refunds/${payment.id}/approve/`), 'primary')}
+                                {actionBtn('Reject', () => {
+                                    const reason = prompt('Reason for rejection?');
+                                    if (reason) handleAction(`/admin/refunds/${payment.id}/reject/`, 'post', { reason });
+                                }, 'danger')}
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No refund requests.</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
     );
 
     return (
-        <div style={{ display: 'flex', gap: '2rem' }}>
-            <aside style={{ width: '200px', borderRight: '1px solid #ddd' }}>
-                <ul style={{ listStyle: 'none', padding: 0 }}>
+        <div className="page" style={{ maxWidth: '1280px', margin: '0 auto', padding: '40px 48px', display: 'flex', gap: '2rem' }}>
+            <aside style={{
+                width: '220px',
+                flexShrink: 0,
+            }}>
+                <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+                    Admin Panel
+                </h2>
+                <nav style={{
+                    background: 'var(--bg)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-lg)',
+                    overflow: 'hidden',
+                }}>
                     {sections.map(s => (
-                        <li key={s.id} 
+                        <button
+                            key={s.id}
                             onClick={() => setActiveSection(s.id)}
-                            style={{ 
-                                padding: '0.5rem', 
-                                cursor: 'pointer', 
-                                backgroundColor: activeSection === s.id ? '#eee' : 'transparent',
-                                fontWeight: activeSection === s.id ? 'bold' : 'normal'
-                            }}>
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                width: '100%',
+                                padding: '0.7rem 1rem',
+                                border: 'none',
+                                borderBottom: '1px solid var(--border)',
+                                background: activeSection === s.id ? 'var(--accent-light)' : 'transparent',
+                                color: activeSection === s.id ? 'var(--accent)' : 'var(--text-secondary)',
+                                fontWeight: activeSection === s.id ? 600 : 400,
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                textAlign: 'left',
+                                transition: 'all 0.1s',
+                            }}
+                            onMouseEnter={e => { if (activeSection !== s.id) e.currentTarget.style.background = 'var(--bg-subtle)'; }}
+                            onMouseLeave={e => { if (activeSection !== s.id) e.currentTarget.style.background = 'transparent'; }}
+                        >
+                            <span style={{ fontSize: '1rem' }}>{s.icon}</span>
                             {s.label}
-                        </li>
+                        </button>
                     ))}
-                </ul>
+                </nav>
             </aside>
-            <main style={{ flex: 1 }}>
-                {loading ? <p>Loading...</p> : (
+
+            <main style={{ flex: 1, minWidth: 0 }}>
+                {loading ? (
+                    <div className="loading-state" style={{ padding: '3rem 0' }}>
+                        <div className="spinner" />
+                        Loading...
+                    </div>
+                ) : (
                     <>
-                        {error && <p style={{ color: 'red' }}>{error}</p>}
+                        {error && (
+                            <div style={{
+                                background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-md)',
+                                padding: '0.75rem 1rem', marginBottom: '1rem', color: '#dc2626', fontSize: '0.85rem',
+                            }}>
+                                {error}
+                            </div>
+                        )}
                         {activeSection === 'reports' && renderReports()}
                         {activeSection === 'users' && renderUsers()}
                         {activeSection === 'mentors' && renderMentors()}

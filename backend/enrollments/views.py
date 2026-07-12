@@ -30,7 +30,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.role == 'ADMIN':
-            return Enrollment.objects.all()
+            return Enrollment.objects.none()
         if user.role == 'MENTOR':
             return Enrollment.objects.filter(course__mentor=user)
         return Enrollment.objects.filter(student=user)
