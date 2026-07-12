@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import api, { apiBase } from '../api';
@@ -156,6 +156,7 @@ function VideoEmbed({ url }) {
 export default function LearnCourse() {
   const { id, lessonId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [course, setCourse] = useState(null);
   const [completedLessons, setCompletedLessons] = useState({});
@@ -165,6 +166,9 @@ export default function LearnCourse() {
   const [markingComplete, setMarkingComplete] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [expandedModules, setExpandedModules] = useState({});
+  const [viewingAnnouncements, setViewingAnnouncements] = useState(false);
+  const [announcements, setAnnouncements] = useState([]);
+  const [announcementsLoading, setAnnouncementsLoading] = useState(false);
   const [certificate, setCertificate] = useState(null);
   const [quizForModule, setQuizForModule] = useState(null); // shows inline quiz
 
@@ -213,6 +217,25 @@ export default function LearnCourse() {
       setLoading(false);
     }
   }, [id, lessonId]);
+
+  const fetchAnnouncements = useCallback(async () => {
+    setAnnouncementsLoading(true);
+    try {
+      const res = await api.get(`/announcements/?course=${id}`);
+      setAnnouncements(res.data);
+    } catch (err) {
+      console.error('Could not load announcements:', err);
+    } finally {
+      setAnnouncementsLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'announcements') {
+      setViewingAnnouncements(true);
+      fetchAnnouncements();
+    }
+  }, [searchParams, fetchAnnouncements]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -408,6 +431,39 @@ export default function LearnCourse() {
           })}
         </div>
 
+        {/* Announcements */}
+        <div style={{ borderTop: '1px solid var(--border)' }}>
+          <button
+            onClick={() => {
+              setViewingAnnouncements(prev => !prev);
+              if (!announcements.length) fetchAnnouncements();
+            }}
+            style={{
+              width: '100%', background: viewingAnnouncements ? 'var(--accent-light)' : 'none',
+              border: 'none', cursor: 'pointer', padding: '14px 20px',
+              display: 'flex', alignItems: 'center', gap: '10px',
+              color: viewingAnnouncements ? 'var(--accent)' : 'var(--text-secondary)',
+              fontWeight: viewingAnnouncements ? 600 : 400,
+              fontSize: '0.85rem', transition: 'all 0.15s',
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            <span>Announcements</span>
+            {announcements.length > 0 && (
+              <span style={{
+                marginLeft: 'auto', background: 'var(--accent)', color: '#fff',
+                fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px',
+                borderRadius: '10px', minWidth: '20px', textAlign: 'center',
+              }}>
+                {announcements.length}
+              </span>
+            )}
+          </button>
+        </div>
+
         {/* Certificate Banner */}
         {certificate && (
           <div style={{ padding: '16px 20px', background: '#f0fdf4', borderTop: '1px solid #bbf7d0' }}>
@@ -479,7 +535,41 @@ export default function LearnCourse() {
 
         {/* Lesson Content */}
         <div style={{ flex: 1, padding: '40px 48px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
-          {currentLesson ? (
+          {viewingAnnouncements ? (
+            <div>
+              <div style={{ marginBottom: '32px' }}>
+                <h1 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', marginBottom: '8px' }}>📢 Announcements</h1>
+                <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>
+                  Updates and announcements from your course mentors.
+                </p>
+              </div>
+
+              {announcementsLoading ? (
+                <div className="empty-state"><p>Loading announcements…</p></div>
+              ) : announcements.length === 0 ? (
+                <div className="empty-state"><p>No announcements yet.</p></div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {announcements.map(a => (
+                    <div key={a.id} style={{
+                      background: 'var(--surface)', border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-lg)', padding: '24px',
+                    }}>
+                      <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
+                        {a.title}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginBottom: '14px' }}>
+                        Posted {new Date(a.created_at).toLocaleDateString()} by {a.course_name}
+                      </div>
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+                        {a.content}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : currentLesson ? (
             <>
               <div style={{ marginBottom: '32px' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '8px' }}>

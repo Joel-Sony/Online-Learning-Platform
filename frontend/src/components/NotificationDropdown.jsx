@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../hooks/useNotifications';
 
 function NotificationDropdown() {
   const { notifications, unreadCount, markAsRead, markAllRead } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
@@ -88,7 +90,13 @@ function NotificationDropdown() {
               notifications.slice(0, 10).map(n => (
                 <div
                   key={n.id}
-                  onClick={() => !n.is_read && markAsRead(n.id)}
+                  onClick={() => {
+                    if (!n.is_read) markAsRead(n.id);
+                    if (n.type === 'ANNOUNCEMENT' && n.course) {
+                      setIsOpen(false);
+                      navigate(`/courses/${n.course}/learn?tab=announcements`);
+                    }
+                  }}
                   className={`notification-item ${!n.is_read ? 'unread' : ''}`}
                   style={{ position: 'relative' }}
                 >

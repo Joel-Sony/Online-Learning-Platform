@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Notification, Announcement
 from .serializers import NotificationSerializer, AnnouncementSerializer
 from .utils import create_notification
@@ -29,6 +30,8 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
     queryset = Announcement.objects.all()
     serializer_class = AnnouncementSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['course']
 
     def perform_create(self, serializer):
         announcement = serializer.save(mentor=self.request.user)
