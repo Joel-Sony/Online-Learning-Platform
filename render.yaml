@@ -9,7 +9,7 @@ services:
     runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: daphne -b 0.0.0.0 -p $PORT core.asgi:application
+    startCommand: python manage.py migrate && python manage.py generate_all_content && python manage.py download_thumbnails && daphne -b 0.0.0.0 -p $PORT core.asgi:application
     envVars:
       - key: DEBUG
         value: "False"
