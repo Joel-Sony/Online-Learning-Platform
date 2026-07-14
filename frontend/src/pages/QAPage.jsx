@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api, { getWebSocketUrl } from '../api';
+import FlagModal from '../components/FlagModal';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -116,13 +117,8 @@ function ReplyItem({ reply, courseId, questionId, onDelete, onReplyPosted }) {
                         </button>
                     )}
                     
-                    <button 
-                        onClick={async () => {
-                            if (confirm('Flag this reply as inappropriate?')) {
-                                await api.patch(`/courses/${courseId}/qna/questions/${questionId}/replies/${reply.id}/`, { is_flagged: true });
-                                alert('Reply flagged.');
-                            }
-                        }}
+                    <button
+                        onClick={() => setFlagTarget({ type: 'reply', id: reply.id, questionId, label: 'this reply' })}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: '0.75rem', padding: 0 }}
                     >
                         Flag
@@ -287,13 +283,8 @@ function QuestionCard({ question, courseId, isMentorOrAdmin, onPin, onDelete, on
                                 Delete
                             </button>
                         )}
-                        <button 
-                            onClick={async () => {
-                                if (confirm('Flag this question as inappropriate?')) {
-                                    await api.patch(`/courses/${courseId}/qna/questions/${question.id}/`, { is_flagged: true });
-                                    alert('Question flagged.');
-                                }
-                            }}
+                        <button
+                            onClick={() => setFlagTarget({ type: 'question', id: question.id, label: 'this question' })}
                             className="btn btn-sm"
                             style={{ height: '28px', padding: '0 8px', fontSize: '0.72rem', background: 'transparent', border: 'none', color: 'var(--text-tertiary)' }}
                         >
@@ -375,6 +366,7 @@ function QAPage() {
     const [isEnrolled, setIsEnrolled] = useState(false);
     const [isMentorOrAdmin, setIsMentorOrAdmin] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [flagTarget, setFlagTarget] = useState(null);
     const socketRef = useRef(null);
 
     useEffect(() => {
@@ -618,6 +610,22 @@ function QAPage() {
                 </div>
 
             </div>
+
+            <FlagModal
+                isOpen={!!flagTarget}
+                onClose={() => setFlagTarget(null)}
+                onSubmit={async (reason) => {
+                    if (!flagTarget) return;
+                    if (flagTarget.type === 'reply') {
+                        await api.patch(`/courses/${courseId}/qna/questions/${flagTarget.questionId}/replies/${flagTarget.id}/`, { is_flagged: true });
+                    } else {
+                        await api.patch(`/courses/${courseId}/qna/questions/${flagTarget.id}/`, { is_flagged: true });
+                    }
+                    setFlagTarget(null);
+                }}
+                title="Flag Content"
+                label={`Why are you flagging ${flagTarget?.label || 'this content'} as inappropriate?`}
+            />
         </div>
     );
 }

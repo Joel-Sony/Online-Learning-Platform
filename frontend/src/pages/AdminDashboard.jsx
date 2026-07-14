@@ -368,6 +368,8 @@ function AdminDashboard() {
                     <tr>
                         <th style={thStyle}>Review</th>
                         <th style={thStyle}>Student</th>
+                        <th style={thStyle}>Reason</th>
+                        <th style={thStyle}>Reported By</th>
                         <th style={thStyle}>Actions</th>
                     </tr>
                 </thead>
@@ -379,11 +381,13 @@ function AdminDashboard() {
                         >
                             <td style={tdStyle}>{r.review_text}</td>
                             <td style={tdStyle}>{r.student_name}</td>
+                            <td style={tdStyle}>{(r.reports && r.reports[0]?.reason) || '—'}</td>
+                            <td style={tdStyle}>{(r.reports && r.reports[0]?.reported_by) || '—'}</td>
                             <td style={tdStyle}>{actionBtn('Delete', () => handleAction(`/admin/reviews/${r.id}/delete_review/`, 'delete'), 'danger')}</td>
                         </tr>
                     )) : (
                         <tr>
-                            <td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No flagged reviews.</td>
+                            <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No flagged reviews.</td>
                         </tr>
                     )}
                 </tbody>

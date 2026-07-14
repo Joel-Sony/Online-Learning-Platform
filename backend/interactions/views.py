@@ -37,7 +37,9 @@ class ReviewReportViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(reported_by=self.request.user)
+        report = serializer.save(reported_by=self.request.user)
+        report.review.is_flagged = True
+        report.review.save(update_fields=['is_flagged'])
 
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()

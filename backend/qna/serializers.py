@@ -12,7 +12,7 @@ class ReplySerializer(serializers.ModelSerializer):
             'id', 'question', 'author', 'author_name',
             'body', 'is_mentor_response', 'is_flagged', 'parent', 'children', 'created_at'
         )
-        read_only_fields = ('author', 'question', 'is_mentor_response', 'is_flagged')
+        read_only_fields = ('author', 'question', 'is_mentor_response')
 
     def get_children(self, obj):
         # Only top-level replies have children; don't recurse deeper
@@ -32,7 +32,7 @@ class QuestionSerializer(serializers.ModelSerializer):
             'id', 'course', 'author', 'author_name',
             'title', 'body', 'is_pinned', 'is_flagged', 'reply_count', 'replies', 'created_at'
         )
-        read_only_fields = ('author', 'is_pinned', 'is_flagged', 'course')
+        read_only_fields = ('author', 'is_pinned', 'course')
 
     def get_replies(self, obj):
         # Only return top-level replies; children are nested inside each reply

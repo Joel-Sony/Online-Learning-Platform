@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api';
+import FlagModal from '../components/FlagModal';
 
 function CourseDetails() {
   const { id } = useParams();
@@ -15,6 +16,7 @@ function CourseDetails() {
   const [newReview, setNewReview] = useState({ rating: 5, review_text: '' });
   const [paymentError, setPaymentError] = useState('');
   const [enrolling, setEnrolling] = useState(false);
+  const [flaggingReview, setFlaggingReview] = useState(null);
   const isLoggedIn = !!localStorage.getItem('access');
 
   useEffect(() => {
@@ -149,6 +151,7 @@ function CourseDetails() {
   );
 
   return (
+    <>
     <div className="page" style={{ maxWidth: '1000px', paddingTop: '2rem' }}>
       {/* Header Section */}
       <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
@@ -408,13 +411,7 @@ function CourseDetails() {
                     "{review.review_text}"
                   </p>
                   <button 
-                    onClick={async () => {
-                      if (confirm('Flag this review as inappropriate?')) {
-                        await api.patch(`/reviews/${review.id}/`, { is_flagged: true });
-                        alert('Review flagged.');
-                        fetchData();
-                      }
-                    }}
+                    onClick={() => setFlaggingReview(review)}
                     className="mono" style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0, textDecoration: 'underline', fontSize: '0.7rem' }}
                   >
                     Flag
@@ -429,6 +426,19 @@ function CourseDetails() {
         </div>
       </div>
     </div>
+      <FlagModal
+        isOpen={!!flaggingReview}
+        onClose={() => setFlaggingReview(null)}
+        onSubmit={async (reason) => {
+          if (!flaggingReview) return;
+          await api.post('/reports/', { review: flaggingReview.id, reason });
+          setFlaggingReview(null);
+          fetchData();
+        }}
+        title="Flag Review"
+        label="Why are you flagging this review as inappropriate?"
+      />
+    </>
   );
 }
 

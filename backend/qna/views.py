@@ -47,6 +47,12 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         question = self.get_object()
+        # Allow any enrolled user to flag
+        if 'is_flagged' in serializer.validated_data:
+            if not _is_enrolled(self.request.user, question.course) and self.request.user.role != 'ADMIN':
+                raise PermissionDenied("You must be enrolled to flag questions.")
+            serializer.save()
+            return
         # Only the author or an admin can edit
         if self.request.user != question.author and self.request.user.role != 'ADMIN':
             raise PermissionDenied("You can only edit your own questions.")
@@ -109,6 +115,20 @@ class ReplyViewSet(viewsets.ModelViewSet):
                 message=f"Mentor {self.request.user.username} replied to your question in {course.title}.",
                 course=course,
             )
+
+    def perform_update(self, serializer):
+        reply = self.get_object()
+        # Allow any enrolled user to flag
+        if 'is_flagged' in serializer.validated_data:
+            course = reply.question.course
+            if not _is_enrolled(self.request.user, course) and self.request.user.role != 'ADMIN':
+                raise PermissionDenied("You must be enrolled to flag replies.")
+            serializer.save()
+            return
+        # Only the author or an admin can edit
+        if self.request.user != reply.author and self.request.user.role != 'ADMIN':
+            raise PermissionDenied("You can only edit your own replies.")
+        serializer.save()
 
     def perform_destroy(self, instance):
         user = self.request.user
