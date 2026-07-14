@@ -95,13 +95,22 @@ class ReviewFlaggingTests(APITestCase):
 
     def test_admin_can_delete_flagged_review(self):
         self.client.force_authenticate(user=self.admin)
-        response = self.client.delete(f'/api/admin/reviews/{self.review.id}/delete_review/')
+        response = self.client.post(f'/api/admin/reviews/{self.review.id}/delete_review/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_non_admin_cannot_view_flagged_reviews(self):
         self.client.force_authenticate(user=self.student)
         response = self.client.get('/api/admin/reviews/flagged/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_unflag_review(self):
+        self.review.is_flagged = True
+        self.review.save()
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.post(f'/api/admin/reviews/{self.review.id}/unflag/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.review.refresh_from_db()
+        self.assertFalse(self.review.is_flagged)
 
     def test_flagged_reviews_hidden_from_list(self):
         other_student = User.objects.create_user(username='other', password='pass1234', role='STUDENT')

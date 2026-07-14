@@ -30,6 +30,14 @@ def _check_can_write(user, course):
     if not _is_enrolled(user, course):
         raise PermissionDenied("You must be enrolled in this course to participate in the Q&A.")
 
+def _can_read(user, course):
+    """Students must be enrolled. Mentors and Admins always pass."""
+    if user.role == 'ADMIN':
+        return True
+    if user.role == 'MENTOR':
+        return True
+    return _is_enrolled(user, course)
+
 
 class QuestionViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionSerializer
@@ -37,6 +45,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         course_id = self.kwargs['course_id']
+        course = _get_course_or_404(course_id)
+        if not _can_read(self.request.user, course):
+            raise PermissionDenied("You do not have access to this course's Q&A.")
         return Question.objects.filter(course_id=course_id)
 
     def perform_create(self, serializer):
@@ -80,6 +91,10 @@ class ReplyViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        course_id = self.kwargs['course_id']
+        course = _get_course_or_404(course_id)
+        if not _can_read(self.request.user, course):
+            raise PermissionDenied("You do not have access to this course's Q&A.")
         return Reply.objects.filter(question_id=self.kwargs['question_pk'])
 
     def perform_create(self, serializer):

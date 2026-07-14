@@ -157,20 +157,20 @@ class CourseCRUDTests(APITestCase):
         Course.objects.create(mentor=self.mentor, is_published=True, **self.course_data)
         response = self.client.get('/api/courses/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data['count'], 1)
 
     def test_unpublished_course_hidden_from_students(self):
         course = Course.objects.create(mentor=self.mentor, is_published=False, **self.course_data)
         response = self.client.get('/api/courses/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(response.data['count'], 0)
 
     def test_mentor_sees_own_unpublished_courses(self):
         course = Course.objects.create(mentor=self.mentor, is_published=False, **self.course_data)
         self.client.force_authenticate(user=self.mentor)
         response = self.client.get('/api/courses/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data['count'], 1)
 
     def test_admin_sees_all_courses(self):
         Course.objects.create(mentor=self.mentor, is_published=False, **self.course_data)
@@ -179,7 +179,7 @@ class CourseCRUDTests(APITestCase):
         self.client.force_authenticate(user=self.admin)
         response = self.client.get('/api/courses/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data['count'], 2)
 
     def test_mentor_can_update_own_course(self):
         course = Course.objects.create(mentor=self.mentor, is_published=True, **self.course_data)
@@ -206,7 +206,7 @@ class CourseCRUDTests(APITestCase):
         Course.objects.create(mentor=self.mentor, is_published=True, **self.course_data)
         response = self.client.get('/api/courses/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data['count'], 1)
 
     def test_anonymous_cannot_create_course(self):
         response = self.client.post('/api/courses/', self.course_data, format='json')
@@ -230,27 +230,27 @@ class CourseFilterTests(APITestCase):
     def test_filter_by_category(self):
         response = self.client.get('/api/courses/?category=Programming')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data['count'], 2)
 
     def test_filter_by_level(self):
         response = self.client.get('/api/courses/?level=BEGINNER')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data['count'], 1)
 
     def test_filter_by_price_range(self):
         response = self.client.get('/api/courses/?price_min=10&price_max=100')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data['count'], 2)
 
     def test_filter_by_free(self):
         response = self.client.get('/api/courses/?is_free=true')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data['count'], 1)
 
     def test_search_by_title(self):
         response = self.client.get('/api/courses/?search=Course')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 3)
+        self.assertEqual(response.data['count'], 3)
 
     def test_autocomplete(self):
         response = self.client.get('/api/courses/autocomplete/?q=Cou')
@@ -298,6 +298,32 @@ class CourseApprovalTests(APITestCase):
         response = self.client.get('/api/admin/courses/pending/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+
+
+class AdminReportsTests(APITestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(username='admin', password='pass1234', role='ADMIN', is_staff=True)
+        self.mentor = User.objects.create_user(username='mentor', password='pass1234', role='MENTOR')
+        self.student = User.objects.create_user(username='student', password='pass1234', role='STUDENT')
+        self.course = Course.objects.create(
+            title='Test Course', description='Desc', category='Programming', level='BEGINNER',
+            language='English', price=0, mentor=self.mentor, is_published=True
+        )
+
+    def test_admin_can_view_reports(self):
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get('/api/admin/reports/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('stats', response.data)
+        self.assertIn('top_courses', response.data)
+        self.assertIn('top_mentors', response.data)
+        self.assertEqual(response.data['stats']['total_users'], 3)
+        self.assertEqual(response.data['stats']['total_courses'], 1)
+
+    def test_non_admin_cannot_view_reports(self):
+        self.client.force_authenticate(user=self.student)
+        response = self.client.get('/api/admin/reports/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class ModuleLessonTests(APITestCase):

@@ -27,9 +27,17 @@ class AdminReviewModerationViewSet(viewsets.ViewSet):
             data[i]['reports'] = reports_data
         return Response(data)
 
-    @action(detail=True, methods=['delete'])
+    @action(detail=True, methods=['post'])
     def delete_review(self, request, pk=None):
         from django.shortcuts import get_object_or_404
         review = get_object_or_404(Review, pk=pk)
         review.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'])
+    def unflag(self, request, pk=None):
+        from django.shortcuts import get_object_or_404
+        review = get_object_or_404(Review, pk=pk)
+        review.is_flagged = False
+        review.save(update_fields=['is_flagged'])
+        return Response({'status': 'unflagged'})

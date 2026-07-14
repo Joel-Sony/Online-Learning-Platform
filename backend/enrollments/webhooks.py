@@ -42,14 +42,10 @@ def stripe_webhook(request):
     # ----------------------------------------------------------------
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        # Debug print to see what session looks like
-        print(f"DEBUG: Stripe Session: {session}")
 
-        # Safely get metadata — session.metadata is a StripeObject, access ._data for the plain dict
-        metadata = session.metadata._data if session.metadata else {}
+        metadata = session.metadata if session.metadata else {}
         course_id = metadata.get('course_id')
         user_id = metadata.get('user_id')
-        print(f"DEBUG: Metadata extracted: course_id={course_id}, user_id={user_id}")
 
 
         if not course_id or not user_id:

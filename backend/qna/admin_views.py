@@ -18,13 +18,13 @@ class AdminQnAModerationViewSet(viewsets.ViewSet):
             'replies': ReplySerializer(replies, many=True).data
         })
 
-    @action(detail=True, methods=['delete'])
+    @action(detail=True, methods=['post'])
     def delete_question(self, request, pk=None):
         question = get_object_or_404(Question, pk=pk)
         question.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['delete'])
+    @action(detail=True, methods=['post'])
     def delete_reply(self, request, pk=None):
         reply = get_object_or_404(Reply, pk=pk)
         reply.delete()

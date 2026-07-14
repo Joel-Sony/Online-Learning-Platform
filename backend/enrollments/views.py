@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from .models import Enrollment, Payment
 from .serializers import EnrollmentSerializer, PaymentSerializer
@@ -25,12 +26,19 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
+        course = serializer.validated_data.get('course')
+        if course and not course.is_free:
+            payment = Payment.objects.filter(
+                user=self.request.user, course=course, status='COMPLETED'
+            ).exists()
+            if not payment:
+                raise PermissionDenied("Payment required for this course.")
         serializer.save(student=self.request.user)
 
     def get_queryset(self):
         user = self.request.user
         if user.role == 'ADMIN':
-            return Enrollment.objects.none()
+            return Enrollment.objects.all()
         if user.role == 'MENTOR':
             return Enrollment.objects.filter(course__mentor=user)
         return Enrollment.objects.filter(student=user)
@@ -187,8 +195,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
             )
 
         # Verify the session belongs to the authenticated user via metadata
-        # session.metadata is a StripeObject whose internal data lives in ._data (a plain dict)
-        metadata = session.metadata._data if session.metadata else {}
+        metadata = session.metadata if session.metadata else {}
         user_id = metadata.get('user_id')
         course_id = metadata.get('course_id')
 
@@ -264,8 +271,12 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         enrollment = self.get_object()
         if enrollment.status == 'REFUNDED':
             return Response({'error': 'Already refunded'}, status=400)
-        
-        # Simple refund request for now (could add more complex logic)
+
+        payment = Payment.objects.filter(course=enrollment.course, user=enrollment.student, status='COMPLETED').last()
+        if payment:
+            payment.status = 'REFUND_REQUESTED'
+            payment.save()
+
         return Response({'status': 'Refund requested'})
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])

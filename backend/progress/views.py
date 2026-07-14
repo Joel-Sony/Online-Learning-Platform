@@ -17,7 +17,7 @@ class ProgressViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.role == 'ADMIN':
-            return LessonProgress.objects.none()
+            return LessonProgress.objects.all()
         if user.role == 'MENTOR':
             return LessonProgress.objects.filter(course__mentor=user)
         return LessonProgress.objects.filter(student=user)

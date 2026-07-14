@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import Avg, Count, Q, Sum
 from rest_framework import viewsets, permissions, filters, status, generics
 from rest_framework.decorators import action
@@ -81,22 +82,21 @@ class CourseViewSet(viewsets.ModelViewSet):
         if not q or len(q) < 2:
             return Response([])
 
-        from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank, TrigramSimilarity
-        from django.db.models import Q
-
         base = Course.objects.filter(is_published=True)
 
-        search_query = SearchQuery(q, config='english')
-        vector = SearchVector('title', weight='A') + SearchVector('tags', weight='B') + SearchVector('category', weight='C')
-        ranked = base.annotate(rank=SearchRank(vector, search_query)).filter(rank__gte=0.01)
-        if ranked.exists():
-            results = ranked.values('id', 'title', 'category').order_by('-rank')[:7]
-        else:
-            trigram = base.annotate(similarity=TrigramSimilarity('title', q)).filter(similarity__gt=0.1)
-            if trigram.exists():
-                results = trigram.values('id', 'title', 'category').order_by('-similarity')[:7]
-            else:
-                results = base.filter(Q(title__icontains=q) | Q(tags__icontains=q) | Q(category__icontains=q)).values('id', 'title', 'category')[:7]
+        with transaction.atomic():
+            try:
+                from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
+                search_query = SearchQuery(q, config='english')
+                vector = SearchVector('title', weight='A') + SearchVector('tags', weight='B') + SearchVector('category', weight='C')
+                ranked = base.annotate(rank=SearchRank(vector, search_query)).filter(rank__gte=0.01)
+                if ranked.exists():
+                    results = ranked.values('id', 'title', 'category').order_by('-rank')[:7]
+                    return Response(list(results))
+            except Exception:
+                pass
+
+        results = base.filter(Q(title__icontains=q) | Q(tags__icontains=q) | Q(category__icontains=q)).values('id', 'title', 'category')[:7]
         return Response(list(results))
 
     def get_queryset(self):

@@ -59,6 +59,7 @@ class QuestionTests(QnABaseTestCase):
             title='Other', description='Desc', category='Design', level='INTERMEDIATE',
             language='English', price=0, mentor=self.mentor, is_published=True
         )
+        Enrollment.objects.create(student=self.student, course=other_course)
         Question.objects.create(course=self.course, author=self.student, title='Q1', body='Body1')
         self.client.force_authenticate(user=self.student)
         response = self.client.get(f'/api/courses/{other_course.id}/qna/questions/')
@@ -255,13 +256,13 @@ class QnAFlaggingTests(QnABaseTestCase):
 
     def test_admin_can_delete_flagged_question(self):
         self.client.force_authenticate(user=self.admin)
-        response = self.client.delete(f'/api/admin/qna/{self.question.id}/delete_question/')
+        response = self.client.post(f'/api/admin/qna/{self.question.id}/delete_question/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Question.objects.count(), 0)
 
     def test_admin_can_delete_flagged_reply(self):
         self.client.force_authenticate(user=self.admin)
-        response = self.client.delete(f'/api/admin/qna/{self.reply.id}/delete_reply/')
+        response = self.client.post(f'/api/admin/qna/{self.reply.id}/delete_reply/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Reply.objects.count(), 0)
 

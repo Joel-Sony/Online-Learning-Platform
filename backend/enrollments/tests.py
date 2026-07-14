@@ -71,9 +71,9 @@ class EnrollmentTests(APITestCase):
 
     def test_student_can_enroll_via_direct_post(self):
         self.client.force_authenticate(user=self.student)
-        response = self.client.post('/api/enrollments/', {'course': self.paid_course.id}, format='json')
+        response = self.client.post('/api/enrollments/', {'course': self.course.id}, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(Enrollment.objects.filter(student=self.student, course=self.paid_course).exists())
+        self.assertTrue(Enrollment.objects.filter(student=self.student, course=self.course).exists())
 
 
 class EnrollmentStatusTests(APITestCase):
@@ -101,6 +101,18 @@ class EnrollmentStatusTests(APITestCase):
         self.client.force_authenticate(user=self.student)
         response = self.client.post(f'/api/enrollments/{enrollment.id}/request_refund/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_request_refund_sets_refund_requested(self):
+        enrollment = Enrollment.objects.create(student=self.student, course=self.course)
+        Payment.objects.create(
+            user=self.student, course=self.course, provider='STRIPE', amount=0,
+            provider_payment_id='test_pi', status='COMPLETED'
+        )
+        self.client.force_authenticate(user=self.student)
+        response = self.client.post(f'/api/enrollments/{enrollment.id}/request_refund/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payment = Payment.objects.filter(user=self.student, course=self.course).first()
+        self.assertEqual(payment.status, 'REFUND_REQUESTED')
 
     def test_unique_enrollment_constraint(self):
         Enrollment.objects.create(student=self.student, course=self.course)

@@ -383,7 +383,12 @@ function AdminDashboard() {
                             <td style={tdStyle}>{r.student_name}</td>
                             <td style={tdStyle}>{(r.reports && r.reports[0]?.reason) || '—'}</td>
                             <td style={tdStyle}>{(r.reports && r.reports[0]?.reported_by) || '—'}</td>
-                            <td style={tdStyle}>{actionBtn('Delete', () => handleAction(`/admin/reviews/${r.id}/delete_review/`, 'delete'), 'danger')}</td>
+                            <td style={tdStyle}>
+                                <div style={{ display: 'flex', gap: '6px' }}>
+                                    {actionBtn('Unflag', () => handleAction(`/admin/reviews/${r.id}/unflag/`), 'secondary')}
+                                    {actionBtn('Delete', () => handleAction(`/admin/reviews/${r.id}/delete_review/`), 'danger')}
+                                </div>
+                            </td>
                         </tr>
                     )) : (
                         <tr>
@@ -403,7 +408,7 @@ function AdminDashboard() {
                             padding: '0.5rem 0', borderBottom: '1px solid var(--border)',
                         }}>
                             <span style={{ fontSize: '0.85rem' }}>{q.title}</span>
-                            {actionBtn('Delete', () => handleAction(`/admin/qna/${q.id}/delete_question/`, 'delete'), 'danger')}
+                            {actionBtn('Delete', () => handleAction(`/admin/qna/${q.id}/delete_question/`), 'danger')}
                         </div>
                     )) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No flagged questions.</p>}
                 </div>
@@ -415,7 +420,7 @@ function AdminDashboard() {
                             padding: '0.5rem 0', borderBottom: '1px solid var(--border)',
                         }}>
                             <span style={{ fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '300px' }}>{r.body}</span>
-                            {actionBtn('Delete', () => handleAction(`/admin/qna/${r.id}/delete_reply/`, 'delete'), 'danger')}
+                            {actionBtn('Delete', () => handleAction(`/admin/qna/${r.id}/delete_reply/`), 'danger')}
                         </div>
                     )) : <p className="mono" style={{ color: 'var(--text-muted)' }}>No flagged replies.</p>}
                 </div>
