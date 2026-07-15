@@ -195,9 +195,8 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
             )
 
         # Verify the session belongs to the authenticated user via metadata
-        metadata = dict(session.metadata) if session.metadata else {}
-        user_id = metadata.get('user_id')
-        course_id = metadata.get('course_id')
+        user_id = session.metadata['user_id'] if session.metadata else None
+        course_id = session.metadata['course_id'] if session.metadata else None
 
         if str(request.user.id) != str(user_id):
             return Response({'error': 'Unauthorized.'}, status=status.HTTP_403_FORBIDDEN)
