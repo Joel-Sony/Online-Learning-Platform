@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 const TOOLBAR_ITEMS = [
   { cmd: 'bold', icon: 'B', title: 'Bold' },
@@ -16,10 +16,17 @@ const TOOLBAR_ITEMS = [
 
 function RichTextEditor({ value, onChange, placeholder, minHeight = '200px' }) {
   const editorRef = useRef(null);
+  const isFocusedRef = useRef(false);
   const [isFocused, setIsFocused] = useState(false);
 
-  const exec = useCallback((cmd, value = null) => {
-    document.execCommand(cmd, false, value);
+  useEffect(() => {
+    if (editorRef.current && !isFocusedRef.current) {
+      editorRef.current.innerHTML = value;
+    }
+  }, [value]);
+
+  const exec = useCallback((cmd, val = null) => {
+    document.execCommand(cmd, false, val);
     if (editorRef.current) {
       onChange(editorRef.current.innerHTML);
     }
@@ -84,12 +91,12 @@ function RichTextEditor({ value, onChange, placeholder, minHeight = '200px' }) {
         })}
       </div>
       <div
-        ref={editorRef}
+        ref={(el) => { editorRef.current = el; if (el && !el.innerHTML) el.innerHTML = value; }}
         contentEditable
         suppressContentEditableWarning
         onInput={handleInput}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onFocus={() => { isFocusedRef.current = true; setIsFocused(true); }}
+        onBlur={() => { isFocusedRef.current = false; setIsFocused(false); }}
         onPaste={handlePaste}
         data-placeholder={placeholder}
         style={{
@@ -102,7 +109,6 @@ function RichTextEditor({ value, onChange, placeholder, minHeight = '200px' }) {
           overflowY: 'auto',
           cursor: 'text',
         }}
-        dangerouslySetInnerHTML={{ __html: value }}
       />
     </div>
   );
