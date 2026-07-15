@@ -8,13 +8,20 @@ function AdminDashboard() {
     const [error, setError] = useState(null);
     const [userSearch, setUserSearch] = useState('');
 
+    const IconBarChart = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>;
+    const IconUsers = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+    const IconCheck = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
+    const IconBook = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
+    const IconFlag = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>;
+    const IconDollar = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
+
     const sections = [
-        { id: 'reports', label: 'Reports', icon: '📊' },
-        { id: 'users', label: 'Users', icon: '👥' },
-        { id: 'mentors', label: 'Mentor Approvals', icon: '✅' },
-        { id: 'courses', label: 'Course Approvals', icon: '📚' },
-        { id: 'moderation', label: 'Moderation', icon: '🚩' },
-        { id: 'refunds', label: 'Refunds', icon: '💰' },
+        { id: 'reports', label: 'Reports', Icon: IconBarChart },
+        { id: 'users', label: 'Users', Icon: IconUsers },
+        { id: 'mentors', label: 'Mentor Approvals', Icon: IconCheck },
+        { id: 'courses', label: 'Course Approvals', Icon: IconBook },
+        { id: 'moderation', label: 'Moderation', Icon: IconFlag },
+        { id: 'refunds', label: 'Refunds', Icon: IconDollar },
     ];
 
     useEffect(() => {
@@ -152,7 +159,7 @@ function AdminDashboard() {
                                             fontSize: '0.7rem', fontWeight: 600, flexShrink: 0,
                                         }}>{i + 1}</span>
                                         <span style={{ flex: 1, fontSize: '0.85rem' }}>{m.username}</span>
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{Number(m.avg_rating || 0).toFixed(1)} ⭐</span>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{Number(m.avg_rating || 0).toFixed(1)}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -362,7 +369,9 @@ function AdminDashboard() {
         <div>
             <h2 style={{ marginBottom: '1rem' }}>Moderation</h2>
 
-            <h3 style={{ fontSize: '0.9rem', marginBottom: '0.75rem', color: 'var(--text-primary)' }}>🚩 Flagged Reviews</h3>
+            <h3 style={{ fontSize: '0.9rem', marginBottom: '0.75rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <IconFlag /> Flagged Reviews
+            </h3>
             <table style={tableStyle}>
                 <thead>
                     <tr>
@@ -398,7 +407,9 @@ function AdminDashboard() {
                 </tbody>
             </table>
 
-            <h3 style={{ fontSize: '0.9rem', margin: '1.5rem 0 0.75rem', color: 'var(--text-primary)' }}>🚩 Flagged Q&A</h3>
+            <h3 style={{ fontSize: '0.9rem', margin: '1.5rem 0 0.75rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <IconFlag /> Flagged Q&amp;A
+            </h3>
             <div style={{ display: 'flex', gap: '1rem' }}>
                 <div style={{ flex: 1, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1rem' }}>
                     <h4 style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Questions</h4>
@@ -508,7 +519,7 @@ function AdminDashboard() {
                             onMouseEnter={e => { if (activeSection !== s.id) e.currentTarget.style.background = 'var(--bg-subtle)'; }}
                             onMouseLeave={e => { if (activeSection !== s.id) e.currentTarget.style.background = 'transparent'; }}
                         >
-                            <span style={{ fontSize: '1rem' }}>{s.icon}</span>
+                            <s.Icon />
                             {s.label}
                         </button>
                     ))}

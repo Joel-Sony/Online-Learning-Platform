@@ -67,18 +67,33 @@ function Register() {
           </div>
 
           <div className="form-group" style={{ marginTop: '1.5rem' }}>
-            <label className="form-label">Role</label>
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+            <label className="form-label">I want to join as a...</label>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem' }}>
               <label style={{ 
                 flex: 1, 
-                border: '1px solid var(--border-strong)',
-                background: formData.role === 'STUDENT' ? 'var(--text-strong)' : 'transparent',
+                border: `1.5px solid ${formData.role === 'STUDENT' ? 'var(--accent)' : 'var(--border-strong)'}`,
+                borderRadius: 'var(--radius-lg)',
+                background: formData.role === 'STUDENT' ? 'var(--accent-light)' : 'transparent',
                 color: formData.role === 'STUDENT' ? '#fff' : 'var(--text-strong)',
-                padding: '1.25rem 1rem',
+                padding: '1.5rem 1rem',
                 cursor: 'pointer',
                 textAlign: 'center',
-                transition: 'all 0.3s'
-              }}>
+                transition: 'all 0.15s ease',
+                userSelect: 'none',
+              }}
+                onMouseEnter={e => {
+                  if (formData.role !== 'STUDENT') {
+                    e.currentTarget.style.borderColor = 'var(--accent)';
+                    e.currentTarget.style.background = 'var(--bg-subtle)';
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (formData.role !== 'STUDENT') {
+                    e.currentTarget.style.borderColor = 'var(--border-strong)';
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
+              >
                 <input 
                   type="radio" 
                   name="role" 
@@ -87,19 +102,41 @@ function Register() {
                   onChange={() => setFormData({...formData, role: 'STUDENT'})}
                   style={{ display: 'none' }}
                 />
-                <div style={{ fontFamily: 'var(--font-body)', fontWeight: '400', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.85rem' }}>Learner</div>
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={formData.role === 'STUDENT' ? 'var(--accent)' : 'var(--text-tertiary)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    <path d="M12 6v7"/><path d="M9 9h6"/>
+                  </svg>
+                </div>
+                <div style={{ fontWeight: '600', fontSize: '0.95rem', color: formData.role === 'STUDENT' ? 'var(--accent)' : 'var(--text-primary)' }}>Learner</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>Browse and take courses</div>
               </label>
               
               <label style={{ 
                 flex: 1, 
-                border: '1px solid var(--border-strong)',
-                background: formData.role === 'MENTOR' ? 'var(--text-strong)' : 'transparent',
+                border: `1.5px solid ${formData.role === 'MENTOR' ? 'var(--accent)' : 'var(--border-strong)'}`,
+                borderRadius: 'var(--radius-lg)',
+                background: formData.role === 'MENTOR' ? 'var(--accent-light)' : 'transparent',
                 color: formData.role === 'MENTOR' ? '#fff' : 'var(--text-strong)',
-                padding: '1.25rem 1rem',
+                padding: '1.5rem 1rem',
                 cursor: 'pointer',
                 textAlign: 'center',
-                transition: 'all 0.3s'
-              }}>
+                transition: 'all 0.15s ease',
+                userSelect: 'none',
+              }}
+                onMouseEnter={e => {
+                  if (formData.role !== 'MENTOR') {
+                    e.currentTarget.style.borderColor = 'var(--accent)';
+                    e.currentTarget.style.background = 'var(--bg-subtle)';
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (formData.role !== 'MENTOR') {
+                    e.currentTarget.style.borderColor = 'var(--border-strong)';
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
+              >
                 <input 
                   type="radio" 
                   name="role" 
@@ -108,7 +145,13 @@ function Register() {
                   onChange={() => setFormData({...formData, role: 'MENTOR'})}
                   style={{ display: 'none' }}
                 />
-                <div style={{ fontFamily: 'var(--font-body)', fontWeight: '400', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.85rem' }}>Instructor</div>
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={formData.role === 'MENTOR' ? 'var(--accent)' : 'var(--text-tertiary)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
+                <div style={{ fontWeight: '600', fontSize: '0.95rem', color: formData.role === 'MENTOR' ? 'var(--accent)' : 'var(--text-primary)' }}>Instructor</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>Create and sell courses</div>
               </label>
             </div>
           </div>

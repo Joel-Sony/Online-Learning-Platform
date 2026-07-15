@@ -12,6 +12,7 @@ function MentorDashboard() {
   const [courses, setCourses] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const username = localStorage.getItem('username');
 
   useEffect(() => {
     Promise.all([fetchCourses(), fetchEnrollments()]).finally(() => setLoading(false));
@@ -19,7 +20,8 @@ function MentorDashboard() {
 
   const fetchCourses = () =>
     api.get('/courses/', { params: { page_size: 100 } }).then(res => {
-      setCourses(res.data.results || res.data);
+      const all = res.data.results || res.data;
+      setCourses(all.filter(c => c.mentor_name === username));
     }).catch(() => {});
 
   const fetchEnrollments = () =>
