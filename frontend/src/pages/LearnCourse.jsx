@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import api, { apiBase } from '../api';
 
 /* ─── Helpers ─────────────────────────────────────────────────── */
@@ -643,7 +646,9 @@ export default function LearnCourse() {
                     borderRadius: 'var(--radius-lg)',
                     padding: '24px 28px',
                   }}>
-                    <div dangerouslySetInnerHTML={{ __html: currentLesson.content }} />
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                      {currentLesson.content}
+                    </ReactMarkdown>
                   </div>
                 </div>
               )}
