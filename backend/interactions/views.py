@@ -14,6 +14,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_queryset(self):
+        qs = Review.objects.filter(is_flagged=False)
+        course_id = self.request.query_params.get('course')
+        if course_id:
+            qs = qs.filter(course_id=course_id)
+        return qs
+
     def perform_create(self, serializer):
         course = serializer.validated_data['course']
         if not Enrollment.objects.filter(student=self.request.user, course=course).exists():
