@@ -348,10 +348,10 @@ function AdminDashboard() {
                             <td style={tdStyle}>{course.mentor_name}</td>
                             <td style={tdStyle}>{badge(course.category, 'warning')}</td>
                             <td style={tdStyle}>
-                                {actionBtn('Approve', () => handleAction(`/admin/courses/approval/${course.id}/approve/`), 'primary')}
+                                {actionBtn('Approve', () => handleAction(`/admin/courses/${course.id}/approve/`), 'primary')}
                                 {actionBtn('Reject', () => {
                                     const reason = prompt('Reason for rejection?');
-                                    if (reason) handleAction(`/admin/courses/approval/${course.id}/reject/`, 'post', { reason });
+                                    if (reason) handleAction(`/admin/courses/${course.id}/reject/`, 'post', { reason });
                                 }, 'danger')}
                             </td>
                         </tr>
