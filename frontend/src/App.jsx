@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -21,7 +22,6 @@ import PaymentFailed from './pages/PaymentFailed';
 import TakeQuiz from './pages/TakeQuiz';
 
 import AdminDashboard from './pages/AdminDashboard';
-import AdminRoute from './components/AdminRoute';
 
 function App() {
   return (
@@ -35,31 +35,69 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/courses/:id" element={<CourseDetails />} />
-            <Route path="/mentor" element={<MentorDashboard />} />
-            <Route path="/mentor/create" element={<CreateCourse />} />
-            <Route path="/mentor/edit/:id" element={<EditCourse />} />
-            <Route path="/mentor/quiz/:id/edit" element={<EditQuiz />} />
-            <Route path="/mentor/analytics" element={<MentorAnalytics />} />
-
-            <Route path="/learning" element={<LearningDashboard />} />
             <Route path="/courses/:id/qa" element={<QAPage />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/mentor/announcement" element={<CreateAnnouncement />} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/payment-failed" element={<PaymentFailed />} />
             <Route path="/quiz/:id" element={<TakeQuiz />} />
             <Route path="/courses/:id/learn" element={<LearnCourse />} />
             <Route path="/courses/:id/learn/:lessonId" element={<LearnCourse />} />
 
+            <Route path="/learning" element={
+              <ProtectedRoute allowedRoles={['STUDENT']}>
+                <LearningDashboard />
+              </ProtectedRoute>
+            } />
 
-            <Route 
-              path="/admin" 
-              element={
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              } 
-            />
+            <Route path="/notifications" element={
+              <ProtectedRoute allowedRoles={['STUDENT', 'MENTOR', 'ADMIN']}>
+                <Notifications />
+              </ProtectedRoute>
+            } />
+            <Route path="/payment-success" element={
+              <ProtectedRoute allowedRoles={['STUDENT', 'MENTOR', 'ADMIN']}>
+                <PaymentSuccess />
+              </ProtectedRoute>
+            } />
+            <Route path="/payment-failed" element={
+              <ProtectedRoute allowedRoles={['STUDENT', 'MENTOR', 'ADMIN']}>
+                <PaymentFailed />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/mentor" element={
+              <ProtectedRoute allowedRoles={['MENTOR', 'ADMIN']}>
+                <MentorDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/mentor/create" element={
+              <ProtectedRoute allowedRoles={['MENTOR', 'ADMIN']}>
+                <CreateCourse />
+              </ProtectedRoute>
+            } />
+            <Route path="/mentor/edit/:id" element={
+              <ProtectedRoute allowedRoles={['MENTOR', 'ADMIN']}>
+                <EditCourse />
+              </ProtectedRoute>
+            } />
+            <Route path="/mentor/quiz/:id/edit" element={
+              <ProtectedRoute allowedRoles={['MENTOR', 'ADMIN']}>
+                <EditQuiz />
+              </ProtectedRoute>
+            } />
+            <Route path="/mentor/analytics" element={
+              <ProtectedRoute allowedRoles={['MENTOR', 'ADMIN']}>
+                <MentorAnalytics />
+              </ProtectedRoute>
+            } />
+            <Route path="/mentor/announcement" element={
+              <ProtectedRoute allowedRoles={['MENTOR', 'ADMIN']}>
+                <CreateAnnouncement />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
           </Routes>
         </main>
       </div>

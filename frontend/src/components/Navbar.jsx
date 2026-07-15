@@ -189,9 +189,30 @@ function Navbar() {
                       }}>
                         {username}
                       </span>
+                      <span style={{
+                        fontSize: '0.6rem',
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        background: role === 'ADMIN' ? 'rgba(220,38,38,0.3)' : role === 'MENTOR' ? 'rgba(217,119,6,0.3)' : 'rgba(37,99,235,0.3)',
+                        color: '#fff',
+                        animation: 'fadeIn 0.2s ease',
+                      }}>
+                        {role}
+                      </span>
                     </>
                   ) : (
-                    username ? username.charAt(0).toUpperCase() : 'U'
+                    <span style={{ position: 'relative', display: 'inline-flex' }}>
+                      {username ? username.charAt(0).toUpperCase() : 'U'}
+                      <span style={{
+                        position: 'absolute', bottom: '-2px', right: '-2px',
+                        width: '8px', height: '8px', borderRadius: '50%',
+                        border: '2px solid var(--accent)',
+                        background: role === 'ADMIN' ? '#dc2626' : role === 'MENTOR' ? '#d97706' : '#2563eb',
+                      }} />
+                    </span>
                   )}
                 </button>
 

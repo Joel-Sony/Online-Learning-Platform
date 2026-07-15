@@ -19,10 +19,12 @@ function Login() {
       localStorage.setItem('refresh', res.data.refresh);
       
       const userRes = await api.get('/users/me/');
-      localStorage.setItem('role', userRes.data.role);
+      const role = userRes.data.role;
+      localStorage.setItem('role', role);
       localStorage.setItem('username', userRes.data.username);
       
-      navigate('/');
+      const redirectMap = { STUDENT: '/learning', MENTOR: '/mentor', ADMIN: '/admin' };
+      navigate(redirectMap[role] || '/');
     } catch (err) {
       setError('Invalid credentials.');
     } finally {
