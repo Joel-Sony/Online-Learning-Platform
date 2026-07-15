@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
+import RichTextEditor from '../components/RichTextEditor';
 
 /* ─── tiny icon helpers ─────────────────────────────────────── */
 const ChevronUp = () => (
@@ -43,7 +44,7 @@ function ModuleSection({ module, mIdx, totalModules, onMoveUp, onMoveDown, onDel
   const [expanded, setExpanded] = useState(true);
   const [addingLesson, setAddingLesson] = useState(false);
   const [addingQuiz, setAddingQuiz] = useState(false);
-  const [lessonForm, setLessonForm] = useState({ title: '', lesson_type: 'VIDEO', video_url: '', file: null, duration_minutes: 0 });
+  const [lessonForm, setLessonForm] = useState({ title: '', lesson_type: 'VIDEO', video_url: '', file: null, content: '', duration_minutes: 0 });
   const [quizForm, setQuizForm] = useState({ title: '', description: '', passing_score: 60 });
   const [saving, setSaving] = useState(false);
 
@@ -62,8 +63,9 @@ function ModuleSection({ module, mIdx, totalModules, onMoveUp, onMoveDown, onDel
       } else {
         if (lessonForm.file) data.append('file', lessonForm.file);
       }
+      data.append('content', lessonForm.content || '');
       await api.post('/lessons/', data, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setLessonForm({ title: '', lesson_type: 'VIDEO', video_url: '', file: null, duration_minutes: 0 });
+      setLessonForm({ title: '', lesson_type: 'VIDEO', video_url: '', file: null, content: '', duration_minutes: 0 });
       setAddingLesson(false);
       onRefresh();
     } catch (err) {
@@ -172,6 +174,15 @@ function ModuleSection({ module, mIdx, totalModules, onMoveUp, onMoveDown, onDel
               ) : (
                 <input type="file" className="form-input" onChange={e => setLessonForm(f => ({ ...f, file: e.target.files[0] }))} />
               )}
+              <div>
+                <label className="form-label" style={{ marginBottom: '6px' }}>Lesson Text Content</label>
+                <RichTextEditor
+                  value={lessonForm.content}
+                  onChange={(html) => setLessonForm(f => ({ ...f, content: html }))}
+                  placeholder="Write your lesson content here..."
+                  minHeight="150px"
+                />
+              </div>
               <input className="form-input" type="number" placeholder="Duration (minutes)" value={lessonForm.duration_minutes} onChange={e => setLessonForm(f => ({ ...f, duration_minutes: e.target.value }))} />
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button className="btn btn-primary btn-sm" onClick={handleSaveLesson} disabled={saving}>{saving ? 'Saving…' : 'Add Lesson'}</button>

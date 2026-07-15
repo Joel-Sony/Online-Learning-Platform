@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import api, { apiBase } from '../api';
 
 /* ─── Helpers ─────────────────────────────────────────────────── */
@@ -33,8 +31,17 @@ function DocIcon() {
 }
 
 /* ─── Lesson Icon ─────────────────────────────────────────────── */
+function TextIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>
+    </svg>
+  );
+}
+
 function LessonTypeIcon({ type }) {
   if (type === 'VIDEO') return <PlayIcon />;
+  if (type === 'TEXT') return <TextIcon />;
   return <DocIcon />;
 }
 
@@ -636,9 +643,7 @@ export default function LearnCourse() {
                     borderRadius: 'var(--radius-lg)',
                     padding: '24px 28px',
                   }}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {currentLesson.content}
-                    </ReactMarkdown>
+                    <div dangerouslySetInnerHTML={{ __html: currentLesson.content }} />
                   </div>
                 </div>
               )}
