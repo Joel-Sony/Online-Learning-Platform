@@ -102,13 +102,10 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.pubsub.RedisPubSubChannelLayer',
         'CONFIG': {
-            "hosts": [{
-                "address": env('REDIS_URL', default='redis://redis:6379/1'),
-                "socket_timeout": 30,
-                "socket_connect_timeout": 30,
-                "socket_keepalive": True,
-                "health_check_interval": 30,
-            }],
+            # RedisPubSubChannelLayer expects a plain URL string in hosts,
+            # not a dict. Render provides a rediss:// (TLS) URL — pass it
+            # directly; channels_redis handles TLS automatically.
+            "hosts": [env('REDIS_URL', default='redis://redis:6379/1')],
             "symmetric_encryption_keys": [SECRET_KEY],
         },
     },
