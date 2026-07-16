@@ -17,6 +17,13 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
+# Behind a TLS-terminating proxy (e.g. Render): trust the forwarded protocol so
+# request.build_absolute_uri() emits https URLs for media/thumbnail links and
+# DRF pagination — otherwise they come back as http and are blocked as mixed
+# content on an https frontend.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 
 # Application definition
 

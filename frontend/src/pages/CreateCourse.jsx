@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 
 function CreateCourse() {
@@ -13,72 +13,110 @@ function CreateCourse() {
     is_published: false
   });
   const [thumbnail, setThumbnail] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
+
+  const handleThumbnail = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setThumbnail(file);
+    setThumbnailPreview(URL.createObjectURL(file));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setSaving(true);
     const data = new FormData();
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
     if (thumbnail) data.append('thumbnail', thumbnail);
 
     try {
-      await api.post('/courses/', data, {
+      const res = await api.post('/courses/', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      navigate('/mentor');
+      // Jump straight into the curriculum builder for the new course.
+      navigate(`/mentor/edit/${res.data.id}`);
     } catch (err) {
-      alert('Failed to create course');
+      const detail = err.response?.data;
+      setError(detail ? (typeof detail === 'string' ? detail : JSON.stringify(detail)) : 'Failed to create course.');
+      setSaving(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'left' }}>
-      <h1>Create New Course</h1>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        <div>
-          <label>Title</label>
-          <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required style={{ width: '100%', padding: '0.5rem' }} />
+    <div className="page" style={{ maxWidth: '680px' }}>
+      <Link to="/mentor" style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>← Studio</Link>
+      <div style={{ marginTop: '8px', marginBottom: 'var(--sp-4)' }}>
+        <span className="label">New course</span>
+        <h1 style={{ marginTop: '4px' }}>Create a Course</h1>
+        <p style={{ marginTop: '6px' }}>Start with the basics — you'll add modules and lessons next.</p>
+      </div>
+
+      {error && <div className="form-error" style={{ marginBottom: 'var(--sp-3)' }}>{error}</div>}
+
+      <form onSubmit={handleSubmit} className="form-stack">
+        <div className="form-group">
+          <label className="form-label">Title</label>
+          <input className="form-input" type="text" value={formData.title}
+            onChange={e => setFormData({ ...formData, title: e.target.value })} required />
         </div>
-        <div>
-          <label>Description</label>
-          <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required style={{ width: '100%', padding: '0.5rem', height: '100px' }} />
+
+        <div className="form-group">
+          <label className="form-label">Description</label>
+          <textarea className="form-textarea" value={formData.description}
+            onChange={e => setFormData({ ...formData, description: e.target.value })} required />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div>
-            <label>Category</label>
-            <input type="text" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required style={{ width: '100%', padding: '0.5rem' }} />
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-2)' }}>
+          <div className="form-group">
+            <label className="form-label">Category</label>
+            <input className="form-input" type="text" value={formData.category}
+              onChange={e => setFormData({ ...formData, category: e.target.value })} required />
           </div>
-          <div>
-            <label>Language</label>
-            <input type="text" value={formData.language} onChange={e => setFormData({...formData, language: e.target.value})} required style={{ width: '100%', padding: '0.5rem' }} />
+          <div className="form-group">
+            <label className="form-label">Language</label>
+            <input className="form-input" type="text" value={formData.language}
+              onChange={e => setFormData({ ...formData, language: e.target.value })} required />
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div>
-            <label>Level</label>
-            <select value={formData.level} onChange={e => setFormData({...formData, level: e.target.value})} style={{ width: '100%', padding: '0.5rem' }}>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-2)' }}>
+          <div className="form-group">
+            <label className="form-label">Level</label>
+            <select className="form-select" value={formData.level}
+              onChange={e => setFormData({ ...formData, level: e.target.value })}>
               <option value="BEGINNER">Beginner</option>
               <option value="INTERMEDIATE">Intermediate</option>
               <option value="ADVANCED">Advanced</option>
             </select>
           </div>
-          <div>
-            <label>Price ($)</label>
-            <input type="number" step="0.01" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required style={{ width: '100%', padding: '0.5rem' }} />
+          <div className="form-group">
+            <label className="form-label">Price ($)</label>
+            <input className="form-input" type="number" step="0.01" min="0" value={formData.price}
+              onChange={e => setFormData({ ...formData, price: e.target.value })} required />
           </div>
         </div>
-        <div>
-          <label>Thumbnail</label>
-          <input type="file" onChange={e => setThumbnail(e.target.files[0])} style={{ width: '100%' }} />
+
+        <div className="form-group">
+          <label className="form-label">Thumbnail</label>
+          {thumbnailPreview && (
+            <img src={thumbnailPreview} alt="thumbnail preview"
+              style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: 'var(--radius-md)', marginBottom: '8px', border: '1px solid var(--border)' }} />
+          )}
+          <input type="file" accept="image/*" className="form-input" onChange={handleThumbnail} />
         </div>
-        <div>
-          <label>
-            <input type="checkbox" checked={formData.is_published} onChange={e => setFormData({...formData, is_published: e.target.checked})} />
-            Publish immediately
-          </label>
-        </div>
-        <button type="submit" style={{ padding: '1rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-          Create Course
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.875rem' }}>
+          <input type="checkbox" checked={formData.is_published}
+            onChange={e => setFormData({ ...formData, is_published: e.target.checked })} />
+          Publish immediately
+        </label>
+
+        <button type="submit" className="btn btn-primary btn-lg" style={{ marginTop: 'var(--sp-2)' }} disabled={saving}>
+          {saving ? 'Creating…' : 'Create Course'}
         </button>
       </form>
     </div>

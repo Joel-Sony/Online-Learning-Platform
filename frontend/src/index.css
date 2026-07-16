@@ -143,6 +143,39 @@ a {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   Form controls — global base
+   Every text-like input/select/textarea gets the design-system look even
+   when a page forgot to add .form-input/.form-select. These use bare element
+   selectors (low specificity) on purpose, so any explicit class (.form-input,
+   .filter-select, .search-bar-input) or inline style still wins.
+   ═══════════════════════════════════════════════════════════════ */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+textarea,
+select {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  transition: var(--transition-base);
+  box-shadow: var(--shadow-xs);
+  max-width: 100%;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"])::placeholder,
+textarea::placeholder { color: var(--text-tertiary); }
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]):focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+textarea { resize: vertical; }
+select { cursor: pointer; }
+
+/* ═══════════════════════════════════════════════════════════════
    Layout
    ═══════════════════════════════════════════════════════════════ */
 .container {
