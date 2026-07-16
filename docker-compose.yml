@@ -26,9 +26,16 @@ services:
       - ./backend:/app
     ports:
       - "8000:8000"
+    # Optional: holds real secrets (Stripe/PayPal, a custom SECRET_KEY). The app
+    # boots without it thanks to the dev defaults below; copy .env.example to
+    # backend/.env to enable payments. (required:false needs Compose v2.24+.)
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     environment:
+      - DEBUG=True
+      - SECRET_KEY=dev-only-insecure-secret-key-change-me
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
       - DATABASE_URL=postgres://online_user:online_password@db:5432/online_platform
       - REDIS_URL=redis://redis:6379/1
       - EMAIL_HOST=mailpit
@@ -46,9 +53,13 @@ services:
     ports:
       - "8001:8001"
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings
+      - DEBUG=True
+      - SECRET_KEY=dev-only-insecure-secret-key-change-me
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,daphne
       - DATABASE_URL=postgres://online_user:online_password@db:5432/online_platform
       - REDIS_URL=redis://redis:6379/1
     depends_on:

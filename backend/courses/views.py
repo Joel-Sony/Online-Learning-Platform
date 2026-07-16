@@ -47,9 +47,13 @@ class CourseViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
     def approve(self, request, pk=None):
         course = self.get_object()
-        course.is_published = True # Assuming approval means publishing for now
-        course.save()
-        
+        # Keep `status` and `is_published` in lockstep — they are two views of
+        # the same approval state and must never disagree (see also
+        # courses.admin_views.AdminCourseApprovalViewSet).
+        course.status = 'PUBLISHED'
+        course.is_published = True
+        course.save(update_fields=['status', 'is_published'])
+
         from notifications.utils import create_notification
         create_notification(
             recipient=course.mentor,
@@ -62,9 +66,13 @@ class CourseViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
     def reject(self, request, pk=None):
         course = self.get_object()
-        # You might want a reason field in the request
         reason = request.data.get('reason', 'No reason provided.')
-        
+
+        # A rejected course must not stay published.
+        course.status = 'REJECTED'
+        course.is_published = False
+        course.save(update_fields=['status', 'is_published'])
+
         from notifications.utils import create_notification
         create_notification(
             recipient=course.mentor,
@@ -100,7 +108,9 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response(list(results))
 
     def get_queryset(self):
-        queryset = Course.objects.annotate(
+        # select_related('mentor') avoids one extra query per course for the
+        # serializer's `mentor_name` field.
+        queryset = Course.objects.select_related('mentor').annotate(
             avg_rating=Avg('reviews__rating'),
             enrollment_count=Count('enrollments', distinct=True),
             total_duration=Sum('modules__lessons__duration_minutes')

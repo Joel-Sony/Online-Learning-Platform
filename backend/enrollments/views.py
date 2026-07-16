@@ -36,12 +36,15 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         serializer.save(student=self.request.user)
 
     def get_queryset(self):
+        # The serializer nests the course (and its mentor) plus the student, so
+        # pull them in one query to avoid an N+1 across the enrollment list.
+        base = Enrollment.objects.select_related('course__mentor', 'student')
         user = self.request.user
         if user.role == 'ADMIN':
-            return Enrollment.objects.all()
+            return base
         if user.role == 'MENTOR':
-            return Enrollment.objects.filter(course__mentor=user)
-        return Enrollment.objects.filter(student=user)
+            return base.filter(course__mentor=user)
+        return base.filter(student=user)
 
     @action(detail=False, methods=['post'])
     def enroll_free(self, request):

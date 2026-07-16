@@ -58,6 +58,9 @@ AUTH_USER_MODEL = 'users.User'
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise serves static files (e.g. the Django admin CSS/JS) when
+    # DEBUG=False. Must sit directly after SecurityMiddleware.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,7 +94,7 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels_redis.pubsub.RedisPubSubChannelLayer',
         'CONFIG': {
             "hosts": [{
-                "address": env('REDIS_URL', default='redis://redis:6379/0'),
+                "address": env('REDIS_URL', default='redis://redis:6379/1'),
                 "socket_timeout": 30,
                 "socket_connect_timeout": 30,
                 "socket_keepalive": True,
@@ -140,6 +143,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Let WhiteNoise compress and serve collected static files in production.
+# (CompressedStaticFilesStorage, not the Manifest variant, to avoid a hard
+# failure if any referenced asset is missing.)
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -157,6 +168,10 @@ REST_FRAMEWORK = {
 # CORS settings
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])
 
+# CSRF: with DEBUG=False over HTTPS, Django checks the request Origin against
+# this list (needed for admin login POSTs on the deployed domain).
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+
 # JWT settings
 from datetime import timedelta
 SIMPLE_JWT = {
@@ -173,7 +188,10 @@ STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='')
 # PayPal Settings
 PAYPAL_CLIENT_ID = env('PAYPAL_CLIENT_ID', default='')
 PAYPAL_CLIENT_SECRET = env('PAYPAL_CLIENT_SECRET', default='')
-PAYPAL_MODE = 'sandbox' if DEBUG else 'live'
+# Explicit and safe-by-default: stays in sandbox unless PAYPAL_MODE=live is set
+# deliberately. (Previously any DEBUG=False deploy silently flipped to live,
+# even with sandbox credentials — a real charging risk.)
+PAYPAL_MODE = env('PAYPAL_MODE', default='sandbox')
 PAYPAL_CURRENCY = env('PAYPAL_CURRENCY', default='USD')
 
 # Frontend URL

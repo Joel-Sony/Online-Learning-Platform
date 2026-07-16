@@ -9,7 +9,15 @@ services:
     runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: python manage.py migrate && python manage.py generate_all_content && python manage.py download_thumbnails && python manage.py create_admin && daphne -b 0.0.0.0 -p $PORT core.asgi:application
+    # migrate + collectstatic must succeed (&&); the demo-seed commands are
+    # best-effort (|| true) so a seeding hiccup can never block the release.
+    startCommand: >-
+      python manage.py migrate &&
+      python manage.py collectstatic --noinput &&
+      (python manage.py generate_all_content || true) &&
+      (python manage.py download_thumbnails || true) &&
+      (python manage.py create_admin || true) &&
+      daphne -b 0.0.0.0 -p $PORT core.asgi:application
     envVars:
       - key: DEBUG
         value: "False"
@@ -28,7 +36,14 @@ services:
           property: connectionString
       - key: CORS_ALLOWED_ORIGINS
         sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
       - key: FRONTEND_URL
+        sync: false
+      # Set this in the Render dashboard so the seeded admin has a private
+      # password instead of the in-code fallback. Leave PayPal in sandbox
+      # unless you deliberately set PAYPAL_MODE=live.
+      - key: DJANGO_ADMIN_PASSWORD
         sync: false
 
   # 2. Frontend Static Site running Vite React
@@ -38,6 +53,13 @@ services:
     rootDir: frontend
     buildCommand: npm run build
     staticPublishPath: dist
+    # SPA rewrite: React Router owns client-side routing, so every non-asset
+    # path must fall through to index.html. Without this, refreshing or
+    # deep-linking to e.g. /courses/5 returns a 404 from Render's static server.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: VITE_API_URL
         sync: false

@@ -3,7 +3,7 @@ from rest_framework import status
 from django.contrib.auth import get_user_model
 from courses.models import Course
 from enrollments.models import Enrollment
-from interactions.models import Review, ReviewReport, Question, Answer
+from interactions.models import Review, ReviewReport
 
 User = get_user_model()
 
@@ -150,40 +150,6 @@ class ReviewReportTests(APITestCase):
         }, format='json')
         self.assertEqual(response.data['reported_by'], self.student.id)
 
-
-class LegacyQnATests(APITestCase):
-    def setUp(self):
-        self.student = User.objects.create_user(username='student', password='pass1234', role='STUDENT')
-        self.course = Course.objects.create(
-            title='Test Course', description='Desc', category='Programming', level='BEGINNER',
-            language='English', price=0,
-            mentor=User.objects.create_user(username='mentor', password='pass1234', role='MENTOR'),
-            is_published=True
-        )
-        Enrollment.objects.create(student=self.student, course=self.course)
-
-    def test_create_question(self):
-        self.client.force_authenticate(user=self.student)
-        response = self.client.post('/api/questions/', {
-            'course': self.course.id, 'title': 'Question?', 'content': 'Help please'
-        }, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Question.objects.count(), 1)
-
-    def test_create_answer(self):
-        q = Question.objects.create(course=self.course, author=self.student, title='Q?', content='Help')
-        self.client.force_authenticate(user=self.student)
-        response = self.client.post('/api/answers/', {
-            'question': q.id, 'content': 'Here is the answer'
-        }, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Answer.objects.count(), 1)
-
-    def test_list_questions_with_answers(self):
-        q = Question.objects.create(course=self.course, author=self.student, title='Q?', content='Help')
-        Answer.objects.create(question=q, author=self.student, content='Answer 1')
-        self.client.force_authenticate(user=self.student)
-        response = self.client.get('/api/questions/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(len(response.data[0]['answers']), 1)
+# The legacy interactions Q&A endpoints (/api/questions/, /api/answers/) were
+# removed in favour of the `qna` app; their tests were removed with them.
+# Q&A is now covered by qna/tests.py.

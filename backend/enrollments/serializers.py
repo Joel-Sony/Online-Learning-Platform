@@ -9,7 +9,9 @@ class EnrollmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Enrollment
         fields = ('id', 'student', 'student_name', 'course', 'course_details', 'enrolled_at', 'status')
-        read_only_fields = ('student', 'enrolled_at')
+        # 'status' is server-controlled (set on payment/refund). A student must not be
+        # able to PATCH themselves to ACTIVE or tamper with enrollment lifecycle state.
+        read_only_fields = ('student', 'enrolled_at', 'status')
 
 class PaymentSerializer(serializers.ModelSerializer):
     user_name = serializers.ReadOnlyField(source='user.username')

@@ -11,7 +11,7 @@ class Enrollment(models.Model):
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='enrollments')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
     enrolled_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE, db_index=True)
 
     class Meta:
         unique_together = ('student', 'course')
@@ -31,8 +31,11 @@ class Payment(models.Model):
         REFUND_REQUESTED = 'REFUND_REQUESTED', 'Refund Requested'
         REFUNDED = 'REFUNDED', 'Refunded'
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='payments')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='payments')
+    # PROTECT, not CASCADE: payment records are a financial audit trail and must
+    # survive deletion of the related user or course (deleting a parent with
+    # payments now raises ProtectedError instead of silently erasing history).
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='payments')
+    course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name='payments')
     provider = models.CharField(max_length=20, choices=Provider.choices)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=10, default='USD')

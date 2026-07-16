@@ -16,10 +16,16 @@ class Notification(models.Model):
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True)
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications')
 
     class Meta:
         ordering = ['-created_at']
+        # The feed always queries "my notifications, newest first", and the
+        # unread badge filters on is_read — index both access paths.
+        indexes = [
+            models.Index(fields=['recipient', '-created_at']),
+            models.Index(fields=['recipient', 'is_read']),
+        ]
 
     def __str__(self):
         return f"{self.recipient.username} - {self.type} - {self.message[:20]}"

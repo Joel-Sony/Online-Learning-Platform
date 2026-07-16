@@ -48,7 +48,13 @@ class QuestionViewSet(viewsets.ModelViewSet):
         course = _get_course_or_404(course_id)
         if not _can_read(self.request.user, course):
             raise PermissionDenied("You do not have access to this course's Q&A.")
-        return Question.objects.filter(course_id=course_id)
+        # Pull authors and the reply tree up front — the serializer walks
+        # replies → children → author per question otherwise (multi-level N+1).
+        return (
+            Question.objects.filter(course_id=course_id)
+            .select_related('author')
+            .prefetch_related('replies__author', 'replies__children__author')
+        )
 
     def perform_create(self, serializer):
         course = _get_course_or_404(self.kwargs['course_id'])

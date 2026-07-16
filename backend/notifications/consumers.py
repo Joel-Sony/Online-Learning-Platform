@@ -1,4 +1,5 @@
 import json
+from urllib.parse import parse_qs
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
@@ -7,13 +8,19 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
+def _extract_token(query_string):
+    """Parse the `token` query param robustly (a naive split('token=') also
+    matches params like `refresh_token=` and slices the wrong value)."""
+    params = parse_qs(query_string)
+    values = params.get('token')
+    return values[0] if values else None
+
+
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # ws://localhost:8001/ws/notifications/?token=ABC...
-        query_string = self.scope['query_string'].decode()
-        token = None
-        if 'token=' in query_string:
-            token = query_string.split('token=')[1].split('&')[0]
+        token = _extract_token(self.scope['query_string'].decode())
 
         self.user = await self.get_user(token)
         

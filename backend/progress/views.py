@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from .models import LessonProgress, Certificate
 from .serializers import LessonProgressSerializer, CertificateSerializer
@@ -23,7 +24,16 @@ class ProgressViewSet(viewsets.ModelViewSet):
         return LessonProgress.objects.filter(student=user)
 
     def perform_create(self, serializer):
-        serializer.save(student=self.request.user, completed_at=timezone.now())
+        # A student may only record progress for a course they are enrolled in.
+        # (The `mark_complete` action already enforces this; the plain create
+        # endpoint must not be a way around it.)
+        lesson = serializer.validated_data.get('lesson')
+        course = serializer.validated_data.get('course') or (lesson.module.course if lesson else None)
+        if course is None:
+            raise ValidationError("A lesson or course is required.")
+        if not Enrollment.objects.filter(student=self.request.user, course=course).exists():
+            raise PermissionDenied("You are not enrolled in this course.")
+        serializer.save(student=self.request.user, course=course, completed_at=timezone.now())
 
     @action(detail=False, methods=['post'])
     def mark_complete(self, request):
