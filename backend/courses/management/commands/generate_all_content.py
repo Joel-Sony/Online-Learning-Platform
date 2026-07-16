@@ -5811,7 +5811,15 @@ class Command(BaseCommand):
     def _add_content_to_lessons(self):
         updated = 0
         typed = 0
-        for lesson in Lesson.objects.select_related("module__course").all():
+        # Only touch lessons with no content yet. This command runs on every
+        # deploy (see render.yaml), and previously overwrote `content` and
+        # `lesson_type` on *every* lesson unconditionally — including lessons
+        # a real mentor had already authored through the UI, silently
+        # destroying their work on the next redeploy/cold start. Skipping
+        # lessons that already have content makes this idempotent: it only
+        # backfills placeholder lessons from `seed_courses`, never touches
+        # anything a mentor (or a prior run of this command) has written.
+        for lesson in Lesson.objects.select_related("module__course").filter(content=""):
             content = generate_content(
                 lesson.title,
                 lesson.module.title,

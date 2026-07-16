@@ -18,10 +18,20 @@ class ProgressViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.role == 'ADMIN':
-            return LessonProgress.objects.all()
-        if user.role == 'MENTOR':
-            return LessonProgress.objects.filter(course__mentor=user)
-        return LessonProgress.objects.filter(student=user)
+            qs = LessonProgress.objects.all()
+        elif user.role == 'MENTOR':
+            qs = LessonProgress.objects.filter(course__mentor=user)
+        else:
+            qs = LessonProgress.objects.filter(student=user)
+
+        # Callers that only want one course's progress (e.g. a lesson/learn
+        # page) must be able to scope the list — without this, "completed
+        # lessons" tallies from every enrolled course get mixed into one
+        # course's total, inflating its percentage past 100%.
+        course_id = self.request.query_params.get('course_id')
+        if course_id:
+            qs = qs.filter(course_id=course_id)
+        return qs
 
     def perform_create(self, serializer):
         # A student may only record progress for a course they are enrolled in.

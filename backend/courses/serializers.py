@@ -69,6 +69,11 @@ class CourseSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True, read_only=True)
     mentor_name = serializers.ReadOnlyField(source='mentor.username')
     thumbnail = serializers.SerializerMethodField()
+    # These come from CourseViewSet.get_queryset()'s annotate() — present on
+    # the instance for both list and retrieve, just not declared here before.
+    avg_rating = serializers.FloatField(read_only=True, default=None)
+    enrollment_count = serializers.IntegerField(read_only=True, default=0)
+    total_duration = serializers.IntegerField(read_only=True, default=0)
 
     class Meta:
         model = Course

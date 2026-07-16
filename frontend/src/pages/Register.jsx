@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 
 function Register() {
+  const [fullName, setFullName] = useState('');
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -15,7 +16,14 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/users/register/', formData);
+      // Split "Full Name" into first/last for the User model — used to show
+      // a real name (instead of the username) on certificates, reviews, etc.
+      const trimmedName = fullName.trim();
+      const spaceIdx = trimmedName.indexOf(' ');
+      const first_name = spaceIdx === -1 ? trimmedName : trimmedName.slice(0, spaceIdx);
+      const last_name = spaceIdx === -1 ? '' : trimmedName.slice(spaceIdx + 1).trim();
+
+      await api.post('/users/register/', { ...formData, first_name, last_name });
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.username?.[0] || err.response?.data?.email?.[0] || 'Registration failed');
@@ -34,6 +42,17 @@ function Register() {
         
         <form onSubmit={handleSubmit} className="form-stack">
           <div className="form-group">
+            <label className="form-label">Full Name</label>
+            <input
+              type="text"
+              className="form-input"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="e.g. Jordan Lee"
+            />
+          </div>
+
+          <div className="form-group" style={{ marginTop: '0.5rem' }}>
             <label className="form-label">Username</label>
             <input 
               type="text" 

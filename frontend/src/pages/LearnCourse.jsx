@@ -187,7 +187,7 @@ export default function LearnCourse() {
     try {
       const [courseRes, progressRes, certRes] = await Promise.all([
         api.get(`/courses/${id}/`),
-        api.get(`/progress/`),
+        api.get(`/progress/?course_id=${id}`),
         api.get('/certificates/')
       ]);
 
@@ -201,9 +201,13 @@ export default function LearnCourse() {
       });
       setAllLessons(flat);
 
-      // Build completed map
+      // Build completed map — scoped to this course's own lessons only.
+      // (Belt-and-suspenders: the API call above is already course-scoped,
+      // but this guards against ever mixing in another course's progress
+      // and inflating this course's completed/total ratio past 100%.)
+      const courseLessonIds = new Set(flat.map(l => l.id));
       const map = {};
-      progressRes.data.forEach(p => { if (p.completed) map[p.lesson] = true; });
+      progressRes.data.forEach(p => { if (p.completed && courseLessonIds.has(p.lesson)) map[p.lesson] = true; });
       setCompletedLessons(map);
 
       // Find cert for this course
