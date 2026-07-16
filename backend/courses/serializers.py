@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.db.models import Avg
 from django.conf import settings
 from .models import Course, Module, Lesson, Quiz, QuizQuestion, QuizChoice, QuizAttempt
+from .thumbnail_defaults import THUMBNAIL_URLS
 
 class LessonSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
@@ -98,6 +99,9 @@ class CourseSerializer(serializers.ModelSerializer):
                 return obj.thumbnail.url
             except Exception:
                 pass
+        url = THUMBNAIL_URLS.get(obj.title)
+        if url:
+            return url
         return settings.DEFAULT_THUMBNAIL_URL
 
     def update(self, instance, validated_data):
@@ -129,5 +133,8 @@ class CourseListSerializer(serializers.ModelSerializer):
                 return obj.thumbnail.url
             except Exception:
                 pass
+        url = THUMBNAIL_URLS.get(obj.title)
+        if url:
+            return url
         return settings.DEFAULT_THUMBNAIL_URL
 
