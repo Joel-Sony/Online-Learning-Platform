@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'channels',
+    'cloudinary',
+    'cloudinary_storage',
 
     # Local apps
     'users',
@@ -154,8 +156,23 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # (CompressedStaticFilesStorage, not the Manifest variant, to avoid a hard
 # failure if any referenced asset is missing.)
 STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+
+# Cloudinary — media uploads (course thumbnails, lesson files)
+import cloudinary
+cloudinary.config(
+    cloud_name=env('CLOUDINARY_CLOUD_NAME', default=''),
+    api_key=env('CLOUDINARY_API_KEY', default=''),
+    api_secret=env('CLOUDINARY_API_SECRET', default=''),
+    secure=True,
+)
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY': env('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': env('CLOUDINARY_API_SECRET', default=''),
 }
 
 # Default primary key field type

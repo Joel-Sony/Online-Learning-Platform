@@ -10,6 +10,8 @@ channels_redis
 stripe
 paypalrestsdk
 Pillow
+cloudinary
+django-cloudinary-storage
 djangorestframework-simplejwt
 django-environ
 whitenoise

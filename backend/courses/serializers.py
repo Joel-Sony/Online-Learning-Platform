@@ -1,11 +1,20 @@
 from rest_framework import serializers
 from django.db.models import Avg
 from .models import Course, Module, Lesson, Quiz, QuizQuestion, QuizChoice, QuizAttempt
+import cloudinary
 
 class LessonSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Lesson
         fields = '__all__'
+
+    def get_file_url(self, obj):
+        """Return the Cloudinary CDN URL for the uploaded lesson file."""
+        if not obj.file:
+            return None
+        return obj.file.url
 
 class QuizChoiceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,18 +90,10 @@ class CourseSerializer(serializers.ModelSerializer):
         read_only_fields = ('mentor', 'created_at', 'updated_at')
 
     def get_thumbnail(self, obj):
+        """Return the Cloudinary CDN URL (always absolute HTTPS)."""
         if not obj.thumbnail:
             return None
-        url = obj.thumbnail.url
-        request = self.context.get('request')
-        if request:
-            absolute = request.build_absolute_uri(url)
-            forwarded = request.META.get('HTTP_X_FORWARDED_PROTO', '')
-            if forwarded:
-                scheme = forwarded.split(',')[0].strip()
-                absolute = f'{scheme}://{absolute.split("://")[-1]}'
-            return absolute
-        return url
+        return obj.thumbnail.url
 
 class CourseListSerializer(serializers.ModelSerializer):
     mentor_name = serializers.ReadOnlyField(source='mentor.username')
@@ -106,16 +107,8 @@ class CourseListSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'thumbnail', 'category', 'level', 'price', 'mentor_name', 'is_published', 'status', 'avg_rating', 'enrollment_count', 'total_duration')
 
     def get_thumbnail(self, obj):
+        """Return the Cloudinary CDN URL (always absolute HTTPS)."""
         if not obj.thumbnail:
             return None
-        url = obj.thumbnail.url
-        request = self.context.get('request')
-        if request:
-            absolute = request.build_absolute_uri(url)
-            forwarded = request.META.get('HTTP_X_FORWARDED_PROTO', '')
-            if forwarded:
-                scheme = forwarded.split(',')[0].strip()
-                absolute = f'{scheme}://{absolute.split("://")[-1]}'
-            return absolute
-        return url
+        return obj.thumbnail.url
 
