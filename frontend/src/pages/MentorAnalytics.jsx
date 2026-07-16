@@ -213,7 +213,7 @@ function MentorAnalytics() {
             placeholder="Search courses..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ paddingLeft: '40px' }}
+            style={{ paddingLeft: '44px' }}
           />
           <span style={{ position: 'absolute', left: '14px', top: '12px', color: 'var(--text-tertiary)' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

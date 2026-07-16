@@ -558,7 +558,7 @@ function QAPage() {
                                 placeholder="Search questions or authors..."
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
-                                style={{ paddingLeft: '40px', height: '42px' }}
+                                style={{ paddingLeft: '44px', height: '42px' }}
                             />
                             <span style={{ position: 'absolute', left: '14px', top: '12px', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center' }}>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
