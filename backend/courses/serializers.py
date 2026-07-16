@@ -79,7 +79,6 @@ class ModuleSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True, read_only=True)
     mentor_name = serializers.ReadOnlyField(source='mentor.username')
-    thumbnail = serializers.SerializerMethodField()
     # These come from CourseViewSet.get_queryset()'s annotate() — present on
     # the instance for both list and retrieve, just not declared here before.
     avg_rating = serializers.FloatField(read_only=True, default=None)
@@ -91,32 +90,13 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('mentor', 'created_at', 'updated_at')
 
-    def get_thumbnail(self, obj):
-        """Return the Cloudinary CDN URL via the MediaCloudinaryStorage backend."""
-        if not obj.thumbnail:
-            return None
-        try:
-            return obj.thumbnail.url
-        except Exception:
-            return None
-
 class CourseListSerializer(serializers.ModelSerializer):
     mentor_name = serializers.ReadOnlyField(source='mentor.username')
     avg_rating = serializers.FloatField(read_only=True)
     enrollment_count = serializers.IntegerField(read_only=True)
     total_duration = serializers.IntegerField(read_only=True)
-    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
         fields = ('id', 'title', 'thumbnail', 'category', 'level', 'price', 'mentor_name', 'is_published', 'status', 'avg_rating', 'enrollment_count', 'total_duration')
-
-    def get_thumbnail(self, obj):
-        """Return the Cloudinary CDN URL via the MediaCloudinaryStorage backend."""
-        if not obj.thumbnail:
-            return None
-        try:
-            return obj.thumbnail.url
-        except Exception:
-            return None
 
