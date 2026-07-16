@@ -40,11 +40,33 @@ services:
         sync: false
       - key: FRONTEND_URL
         sync: false
-      # Set this in the Render dashboard so the seeded admin has a private
-      # password instead of the in-code fallback. Leave PayPal in sandbox
-      # unless you deliberately set PAYPAL_MODE=live.
       - key: DJANGO_ADMIN_PASSWORD
         sync: false
+
+      # ── Cloudinary (image / file uploads) ──────────────────────
+      # Get from: https://console.cloudinary.com/ → Settings → API Keys
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # ── Stripe (payments) ───────────────────────────────────────
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
+      # ── PayPal (payments) ───────────────────────────────────────
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_CURRENCY
+        value: "USD"
 
   # 2. Frontend Static Site running Vite React
   - type: web
@@ -62,6 +84,9 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
+        sync: false
+      # WebSocket base URL — set to wss://your-backend.onrender.com
+      - key: VITE_WS_URL
         sync: false
 
   # 3. Redis Instance for Channels WebSockets
