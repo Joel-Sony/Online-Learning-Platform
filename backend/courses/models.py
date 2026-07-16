@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from cloudinary.models import CloudinaryField
 
 class Course(models.Model):
     LEVEL_CHOICES = [
@@ -21,7 +20,7 @@ class Course(models.Model):
     level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='BEGINNER')
     language = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    thumbnail = CloudinaryField('thumbnail', folder='courses/thumbnails', null=True, blank=True)
+    thumbnail = models.ImageField(upload_to='courses/thumbnails/', null=True, blank=True)
     mentor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='mentored_courses')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING', db_index=True)
     is_published = models.BooleanField(default=False, db_index=True)
@@ -57,7 +56,7 @@ class Lesson(models.Model):
     lesson_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     video_url = models.URLField(max_length=500, null=True, blank=True)
     content = models.TextField(blank=True, default='', help_text="Textual lesson content / notes")
-    file = CloudinaryField('file', folder='courses/lessons', null=True, blank=True, resource_type='raw')
+    file = models.FileField(upload_to='courses/lessons/', null=True, blank=True)
     duration_minutes = models.PositiveIntegerField(default=0)
     order = models.PositiveIntegerField(default=0)
 

@@ -45,9 +45,8 @@ class Command(BaseCommand):
                 skipped += 1
                 continue
 
-            # CloudinaryField stores the Cloudinary public_id as a string value.
-            # A truthy check is sufficient — if a public_id is stored the image
-            # already exists on Cloudinary; no .storage.exists() needed.
+            # A truthy FieldFile means a file path/public_id is stored —
+            # the image already exists on Cloudinary. No network call needed.
             if course.thumbnail:
                 self.stdout.write(f"  ✓ {course.title} — thumbnail exists")
                 skipped += 1
