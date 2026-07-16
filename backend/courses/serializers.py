@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Avg
+from django.conf import settings
 from .models import Course, Module, Lesson, Quiz, QuizQuestion, QuizChoice, QuizAttempt
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -79,6 +80,7 @@ class ModuleSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True, read_only=True)
     mentor_name = serializers.ReadOnlyField(source='mentor.username')
+    thumbnail = serializers.SerializerMethodField()
     # These come from CourseViewSet.get_queryset()'s annotate() — present on
     # the instance for both list and retrieve, just not declared here before.
     avg_rating = serializers.FloatField(read_only=True, default=None)
@@ -90,13 +92,42 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('mentor', 'created_at', 'updated_at')
 
+    def get_thumbnail(self, obj):
+        if obj.thumbnail:
+            try:
+                return obj.thumbnail.url
+            except Exception:
+                pass
+        return settings.DEFAULT_THUMBNAIL_URL
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        if request and 'thumbnail' in request.FILES:
+            instance.thumbnail = request.FILES['thumbnail']
+        return super().update(instance, validated_data)
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        if request and 'thumbnail' in request.FILES:
+            validated_data['thumbnail'] = request.FILES['thumbnail']
+        return super().create(validated_data)
+
 class CourseListSerializer(serializers.ModelSerializer):
     mentor_name = serializers.ReadOnlyField(source='mentor.username')
     avg_rating = serializers.FloatField(read_only=True)
     enrollment_count = serializers.IntegerField(read_only=True)
     total_duration = serializers.IntegerField(read_only=True)
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
         fields = ('id', 'title', 'thumbnail', 'category', 'level', 'price', 'mentor_name', 'is_published', 'status', 'avg_rating', 'enrollment_count', 'total_duration')
+
+    def get_thumbnail(self, obj):
+        if obj.thumbnail:
+            try:
+                return obj.thumbnail.url
+            except Exception:
+                pass
+        return settings.DEFAULT_THUMBNAIL_URL
 

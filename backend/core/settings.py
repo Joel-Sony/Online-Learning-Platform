@@ -172,6 +172,10 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': env('CLOUDINARY_API_SECRET', default=''),
 }
 
+# Default thumbnail shown when a course has no uploaded image.
+# Must be AFTER STATIC_URL is defined.
+DEFAULT_THUMBNAIL_URL = STATIC_URL + 'images/default-thumbnail.svg'
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

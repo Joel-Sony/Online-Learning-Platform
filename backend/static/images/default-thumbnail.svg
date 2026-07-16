@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect fill="#1a1a2e" width="800" height="450"/>
+  <rect fill="#16213e" x="40" y="40" width="720" height="370" rx="12"/>
+  <circle fill="#0f3460" cx="400" cy="200" r="60"/>
+  <polyline fill="none" stroke="#e94560" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="380,200 395,215 420,185"/>
+  <text fill="#e94560" font-family="system-ui, sans-serif" font-size="20" font-weight="600" x="400" y="290" text-anchor="middle">Course Image</text>
+  <text fill="#555" font-family="system-ui, sans-serif" font-size="13" x="400" y="320" text-anchor="middle">No thumbnail available</text>
+</svg>
