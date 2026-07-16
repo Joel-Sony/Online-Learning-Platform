@@ -45,7 +45,10 @@ class Command(BaseCommand):
                 skipped += 1
                 continue
 
-            if course.thumbnail and course.thumbnail.storage.exists(course.thumbnail.name):
+            # CloudinaryField stores the Cloudinary public_id as a string value.
+            # A truthy check is sufficient — if a public_id is stored the image
+            # already exists on Cloudinary; no .storage.exists() needed.
+            if course.thumbnail:
                 self.stdout.write(f"  ✓ {course.title} — thumbnail exists")
                 skipped += 1
                 continue
@@ -54,8 +57,10 @@ class Command(BaseCommand):
             fname = f"course_{uuid.uuid4().hex[:8]}{ext}"
             image_data = download_image(source_url, fname)
             if image_data:
+                # Save via the model field — CloudinaryStorage intercepts this
+                # and uploads the file to Cloudinary automatically.
                 course.thumbnail.save(fname, image_data, save=True)
-                self.stdout.write(f"  ✓ {course.title} — downloaded")
+                self.stdout.write(f"  ✓ {course.title} — uploaded to Cloudinary")
                 downloaded += 1
             else:
                 self.stdout.write(f"  ✗ {course.title} — download failed")
