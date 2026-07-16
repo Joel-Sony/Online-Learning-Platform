@@ -605,6 +605,7 @@ select { cursor: pointer; }
   pointer-events: none;
   display: flex;
   align-items: center;
+  z-index: 1;
 }
 
 /* ═══════════════════════════════════════════════════════════════
