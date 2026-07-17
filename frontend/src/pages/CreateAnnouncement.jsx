@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api';
+import { getUsername } from '../auth';
 
 function CreateAnnouncement() {
   const [courses, setCourses] = useState([]);
@@ -19,7 +20,7 @@ function CreateAnnouncement() {
       // Fetch mentor's courses
       const coursesRes = await api.get('/courses/', { params: { page_size: 100 } });
       const list = coursesRes.data.results || coursesRes.data;
-      const mentorCourses = list.filter(c => c.mentor_name === localStorage.getItem('username'));
+      const mentorCourses = list.filter(c => c.mentor_name === getUsername());
       setCourses(mentorCourses);
 
       // Fetch all announcements and filter by those belonging to mentor's courses

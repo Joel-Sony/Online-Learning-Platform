@@ -52,13 +52,12 @@ class AdminRefundViewSet(viewsets.ModelViewSet):
         if refund_success:
             payment.status = 'REFUNDED'
             payment.save()
-            enrollment.status = 'REFUNDED'
-            enrollment.save()
-            
+            enrollment.delete()
+
             create_notification(
                 recipient=payment.user,
                 type='REFUND',
-                message=f"Your refund request for {payment.course.title} has been approved.",
+                message=f"Your refund for {payment.course.title} has been approved. You have been unenrolled from the course.",
                 course=payment.course
             )
             return Response({'status': 'Refund approved'})

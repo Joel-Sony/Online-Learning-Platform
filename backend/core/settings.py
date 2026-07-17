@@ -144,7 +144,7 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -174,7 +174,7 @@ CLOUDINARY_STORAGE = {
 
 # Default thumbnail shown when a course has no uploaded image.
 # Must be AFTER STATIC_URL is defined.
-DEFAULT_THUMBNAIL_URL = STATIC_URL + 'images/default-thumbnail.svg'
+DEFAULT_THUMBNAIL_URL = 'https://res.cloudinary.com/dvex86jfq/image/upload/v1784269931/images/default-thumbnail.svg'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

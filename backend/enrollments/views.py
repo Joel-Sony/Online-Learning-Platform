@@ -44,15 +44,13 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         serializer.save(student=self.request.user)
 
     def get_queryset(self):
-        # The serializer nests the course (and its mentor) plus the student, so
-        # pull them in one query to avoid an N+1 across the enrollment list.
         base = Enrollment.objects.select_related('course__mentor', 'student')
         user = self.request.user
         if user.role == 'ADMIN':
             return base
         if user.role == 'MENTOR':
             return base.filter(course__mentor=user)
-        return base.filter(student=user)
+        return base.filter(student=user).exclude(status='REFUNDED')
 
     @action(detail=False, methods=['post'])
     def enroll_free(self, request):
@@ -298,9 +296,11 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Already refunded'}, status=400)
 
         payment = Payment.objects.filter(course=enrollment.course, user=enrollment.student, status='COMPLETED').last()
-        if payment:
-            payment.status = 'REFUND_REQUESTED'
-            payment.save()
+        if not payment:
+            return Response({'error': 'No completed payment found for this enrollment. Free courses cannot be refunded.'}, status=400)
+
+        payment.status = 'REFUND_REQUESTED'
+        payment.save()
 
         return Response({'status': 'Refund requested'})
 
@@ -340,16 +340,15 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                 return Response({'error': f"PayPal refund logic failed: {str(e)}"}, status=400)
 
         if refund_success:
-            enrollment.status = 'REFUNDED'
-            enrollment.save()
             payment.status = 'REFUNDED'
             payment.save()
+            enrollment.delete()
 
             create_notification(
-                recipient=enrollment.student,
+                recipient=payment.user,
                 type='REFUND',
-                message=f"Your refund for {enrollment.course.title} has been processed successfully.",
-                course=enrollment.course
+                message=f"Your refund for {payment.course.title} has been approved. You have been unenrolled from the course.",
+                course=payment.course
             )
             return Response({'status': 'Refunded successfully'})
         
