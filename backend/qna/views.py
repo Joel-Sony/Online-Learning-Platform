@@ -23,7 +23,7 @@ def _is_enrolled(user, course):
 
 def _check_can_write(user, course):
     """Students must be enrolled. Mentors and Admins always pass."""
-    if user.role == 'ADMIN':
+    if user.role == 'ADMIN' or user.is_staff:
         return
     if user.role == 'MENTOR':
         return
@@ -32,7 +32,7 @@ def _check_can_write(user, course):
 
 def _can_read(user, course):
     """Students must be enrolled. Mentors and Admins always pass."""
-    if user.role == 'ADMIN':
+    if user.role == 'ADMIN' or user.is_staff:
         return True
     if user.role == 'MENTOR':
         return True
@@ -66,26 +66,26 @@ class QuestionViewSet(viewsets.ModelViewSet):
         question = self.get_object()
         # Allow any enrolled user to flag
         if 'is_flagged' in serializer.validated_data:
-            if not _is_enrolled(self.request.user, question.course) and self.request.user.role != 'ADMIN':
+            if not _is_enrolled(self.request.user, question.course) and self.request.user.role != 'ADMIN' and not self.request.user.is_staff:
                 raise PermissionDenied("You must be enrolled to flag questions.")
             serializer.save()
             return
         # Only the author or an admin can edit
-        if self.request.user != question.author and self.request.user.role != 'ADMIN':
+        if self.request.user != question.author and self.request.user.role != 'ADMIN' and not self.request.user.is_staff:
             raise PermissionDenied("You can only edit your own questions.")
         serializer.save()
 
     def perform_destroy(self, instance):
         user = self.request.user
         # Author, course mentor, or admin can delete
-        if user != instance.author and user != instance.course.mentor and user.role != 'ADMIN':
+        if user != instance.author and user != instance.course.mentor and user.role != 'ADMIN' and not user.is_staff:
             raise PermissionDenied("You do not have permission to delete this question.")
         instance.delete()
 
     @action(detail=True, methods=['post'])
     def pin(self, request, course_id=None, pk=None):
         question = self.get_object()
-        if question.course.mentor != request.user and request.user.role != 'ADMIN':
+        if question.course.mentor != request.user and request.user.role != 'ADMIN' and not request.user.is_staff:
             raise PermissionDenied("Only the course mentor or admin can pin questions.")
         question.is_pinned = not question.is_pinned
         question.save(update_fields=['is_pinned'])
@@ -142,18 +142,18 @@ class ReplyViewSet(viewsets.ModelViewSet):
         # Allow any enrolled user to flag
         if 'is_flagged' in serializer.validated_data:
             course = reply.question.course
-            if not _is_enrolled(self.request.user, course) and self.request.user.role != 'ADMIN':
+            if not _is_enrolled(self.request.user, course) and self.request.user.role != 'ADMIN' and not self.request.user.is_staff:
                 raise PermissionDenied("You must be enrolled to flag replies.")
             serializer.save()
             return
         # Only the author or an admin can edit
-        if self.request.user != reply.author and self.request.user.role != 'ADMIN':
+        if self.request.user != reply.author and self.request.user.role != 'ADMIN' and not self.request.user.is_staff:
             raise PermissionDenied("You can only edit your own replies.")
         serializer.save()
 
     def perform_destroy(self, instance):
         user = self.request.user
         course = instance.question.course
-        if user != instance.author and user != course.mentor and user.role != 'ADMIN':
+        if user != instance.author and user != course.mentor and user.role != 'ADMIN' and not user.is_staff:
             raise PermissionDenied("You do not have permission to delete this reply.")
         instance.delete()

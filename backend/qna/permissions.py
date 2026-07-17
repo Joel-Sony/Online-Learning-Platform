@@ -11,7 +11,7 @@ class IsEnrolledOrMentorOrAdmin(permissions.BasePermission):
             return False
 
         # Admins always pass
-        if request.user.role == 'ADMIN':
+        if request.user.role == 'ADMIN' or request.user.is_staff:
             return True
 
         # Mentors always pass (course-level check happens in the view)
@@ -26,7 +26,7 @@ class IsMentorOrAdminForPin(permissions.BasePermission):
     """Only the course mentor or an admin can pin/unpin questions."""
     def has_object_permission(self, request, view, obj):
         user = request.user
-        if user.role == 'ADMIN':
+        if user.role == 'ADMIN' or user.is_staff:
             return True
         # obj is a Question; check if user is its course's mentor
         return obj.course.mentor == user

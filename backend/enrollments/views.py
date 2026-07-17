@@ -22,7 +22,7 @@ paypalrestsdk.configure({
 
 def _check_enrollment_allowed(user, course):
     """Raise PermissionDenied if the user is not allowed to enroll."""
-    if user.role == 'ADMIN':
+    if user.role == 'ADMIN' or user.is_staff:
         raise PermissionDenied("Admins cannot enroll in courses.")
     if user.role == 'MENTOR' and course.mentor == user:
         raise PermissionDenied("Instructors cannot enroll in their own courses.")
@@ -46,7 +46,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         base = Enrollment.objects.select_related('course__mentor', 'student')
         user = self.request.user
-        if user.role == 'ADMIN':
+        if user.role == 'ADMIN' or user.is_staff:
             return base
         if user.role == 'MENTOR':
             return base.filter(course__mentor=user)

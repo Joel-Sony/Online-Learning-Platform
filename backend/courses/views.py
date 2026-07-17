@@ -121,7 +121,7 @@ class CourseViewSet(viewsets.ModelViewSet):
             return queryset.filter(mentor=user)
 
         if user.is_authenticated:
-            if user.role == 'ADMIN':
+            if user.role == 'ADMIN' or user.is_staff:
                 return queryset
             if user.role == 'MENTOR':
                 return queryset.filter(Q(is_published=True) | Q(mentor=user)).distinct()
@@ -199,11 +199,13 @@ class QuizViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = Quiz.objects.all()
         
+        if user.role == 'ADMIN' or user.is_staff:
+            return queryset
         if user.role == 'STUDENT':
             from enrollments.models import Enrollment
             enrolled_courses = Enrollment.objects.filter(student=user, status='ACTIVE').values_list('course_id', flat=True)
             return queryset.filter(module__course_id__in=enrolled_courses)
-        elif user.role == 'MENTOR':
+        if user.role == 'MENTOR':
             return queryset.filter(module__course__mentor=user)
         return queryset
 
@@ -337,7 +339,7 @@ class QuizAttemptViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'ADMIN':
+        if user.role == 'ADMIN' or user.is_staff:
             return QuizAttempt.objects.all()
         elif user.role == 'MENTOR':
             return QuizAttempt.objects.filter(quiz__module__course__mentor=user)
