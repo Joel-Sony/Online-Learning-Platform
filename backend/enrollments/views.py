@@ -20,6 +20,13 @@ paypalrestsdk.configure({
     "client_secret": settings.PAYPAL_CLIENT_SECRET
 })
 
+def _check_enrollment_allowed(user, course):
+    """Raise PermissionDenied if the user is not allowed to enroll."""
+    if user.role == 'ADMIN':
+        raise PermissionDenied("Admins cannot enroll in courses.")
+    if user.role == 'MENTOR' and course.mentor == user:
+        raise PermissionDenied("Instructors cannot enroll in their own courses.")
+
 class EnrollmentViewSet(viewsets.ModelViewSet):
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
@@ -27,6 +34,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         course = serializer.validated_data.get('course')
+        _check_enrollment_allowed(self.request.user, course)
         if course and not course.is_free:
             payment = Payment.objects.filter(
                 user=self.request.user, course=course, status='COMPLETED'
@@ -52,6 +60,11 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         course_id = request.data.get('course_id')
         course = get_object_or_404(Course, id=course_id)
 
+        try:
+            _check_enrollment_allowed(request.user, course)
+        except PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+
         if not course.is_free:
             return Response({'error': 'This course is not free.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -71,7 +84,12 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
     def create_stripe_checkout(self, request):
         course_id = request.data.get('course_id')
         course = get_object_or_404(Course, id=course_id)
-        
+
+        try:
+            _check_enrollment_allowed(request.user, course)
+        except PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+
         if Enrollment.objects.filter(student=request.user, course=course).exists():
             return Response({'error': 'Already enrolled'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -118,6 +136,11 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
     def create_paypal_order(self, request):
         course_id = request.data.get('course_id')
         course = get_object_or_404(Course, id=course_id)
+
+        try:
+            _check_enrollment_allowed(request.user, course)
+        except PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
 
         if Enrollment.objects.filter(student=request.user, course=course).exists():
             return Response({'error': 'Already enrolled'}, status=status.HTTP_400_BAD_REQUEST)

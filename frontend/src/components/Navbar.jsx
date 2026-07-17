@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import NotificationDropdown from './NotificationDropdown';
+import { getRole, getUsername, isAuthenticated } from '../auth';
 
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const role = localStorage.getItem('role');
-  const isAuthenticated = !!localStorage.getItem('access');
-  const username = localStorage.getItem('username') || '';
+  const role = getRole();
+  const authed = isAuthenticated();
+  const username = getUsername() || '';
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {

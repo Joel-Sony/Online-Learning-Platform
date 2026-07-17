@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
+import { getRole } from '../auth';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -18,11 +19,7 @@ function Login() {
       localStorage.setItem('access', res.data.access);
       localStorage.setItem('refresh', res.data.refresh);
       
-      const userRes = await api.get('/users/me/');
-      const role = userRes.data.role;
-      localStorage.setItem('role', role);
-      localStorage.setItem('username', userRes.data.username);
-      
+      const role = getRole();
       const redirectMap = { STUDENT: '/learning', MENTOR: '/mentor', ADMIN: '/admin' };
       navigate(redirectMap[role] || '/');
     } catch (err) {

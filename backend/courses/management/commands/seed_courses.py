@@ -85,7 +85,7 @@ COURSES = [
         "language": "English",
         "tags": "python, programming, beginner, web-scraping",
         "instructor": "alex_morgan",
-        "thumbnail_url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784264615/unsplash/1526374965328-7f61d4dc18c5.jpg",
         "modules": [
             {"title": "Python Fundamentals", "lessons": [
                 {"title": "Introduction to Python", "video_url": "https://www.youtube.com/watch?v=K5KVEU3aaeQ"},
@@ -105,7 +105,7 @@ COURSES = [
         "language": "English",
         "tags": "react, django, full-stack, javascript",
         "instructor": "alex_morgan",
-        "thumbnail_url": "https://images.unsplash.com/photo-1555099962-4199c345e5dd?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784265111/unsplash/1555099962-4199c345e5dd.jpg",
         "modules": [
             {"title": "React Fundamentals", "lessons": [
                 {"title": "Component Architecture", "video_url": "https://www.youtube.com/watch?v=c-QsfbznSXI"},
@@ -125,7 +125,7 @@ COURSES = [
         "language": "English",
         "tags": "ux, ui, figma, design-thinking",
         "instructor": "priya_sharma",
-        "thumbnail_url": "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784265112/unsplash/1561070791-2526d30994b5.jpg",
         "modules": [
             {"title": "Design Thinking", "lessons": [
                 {"title": "Empathize Phase", "video_url": "https://www.youtube.com/watch?v=c9Wg6Cb_YlU"},
@@ -144,7 +144,7 @@ COURSES = [
         "language": "English",
         "tags": "machine-learning, AI, tensorflow, deep-learning",
         "instructor": "yuki_tanaka",
-        "thumbnail_url": "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784265111/unsplash/1677442135703-1787eea5ce01.jpg",
         "modules": [
             {"title": "ML Foundations", "lessons": [
                 {"title": "Linear Regression", "video_url": "https://www.youtube.com/watch?v=i_LwzRVP7bg"},
@@ -164,7 +164,7 @@ COURSES = [
         "language": "English",
         "tags": "business, entrepreneurship, strategy, startup",
         "instructor": "carlos_vega",
-        "thumbnail_url": "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784265112/unsplash/1552664730-d307ca884978.jpg",
         "modules": [
             {"title": "Foundations of Strategy", "lessons": [
                 {"title": "Porter's 5 Forces", "video_url": "https://www.youtube.com/watch?v=fXQrCn4lW7E"},
@@ -183,7 +183,7 @@ COURSES = [
         "language": "English",
         "tags": "photography, lightroom, portrait, composition",
         "instructor": "sofia_bell",
-        "thumbnail_url": "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784263470/unsplash/1452587925148-ce544e77e70d.jpg",
         "modules": [
             {"title": "Camera Fundamentals", "lessons": [
                 {"title": "Understanding Exposure", "video_url": "https://www.youtube.com/watch?v=yhAmMUi2NmM"},
@@ -203,7 +203,7 @@ COURSES = [
         "language": "English",
         "tags": "data-science, pandas, python, visualization",
         "instructor": "yuki_tanaka",
-        "thumbnail_url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784265143/unsplash/1551288049-bebda4e38f71.jpg",
         "modules": [
             {"title": "Data Manipulation", "lessons": [
                 {"title": "Pandas DataFrames", "video_url": "https://www.youtube.com/watch?v=7eh4d6sabA0"},
@@ -222,7 +222,7 @@ COURSES = [
         "language": "English",
         "tags": "marketing, seo, google-ads, social-media",
         "instructor": "carlos_vega",
-        "thumbnail_url": "https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784265144/unsplash/1533750349088-cd871a92f312.jpg",
         "modules": [
             {"title": "SEO Fundamentals", "lessons": [
                 {"title": "Keyword Research", "video_url": "https://www.youtube.com/watch?v=h95cQkEWBx0"},
@@ -242,7 +242,7 @@ COURSES = [
         "language": "English",
         "tags": "react, advanced, performance, architecture",
         "instructor": "alex_morgan",
-        "thumbnail_url": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784265144/unsplash/1633356122544-f134324a6cee.jpg",
         "modules": [
             {"title": "Advanced Patterns", "lessons": [
                 {"title": "Compound Components", "video_url": "https://www.youtube.com/watch?v=9Vuz4BbPkXc"},
@@ -262,7 +262,7 @@ COURSES = [
         "language": "English",
         "tags": "branding, logo-design, typography, identity",
         "instructor": "priya_sharma",
-        "thumbnail_url": "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784263889/unsplash/1524758631624-e2822e304c36.jpg",
         "modules": [
             {"title": "Brand Strategy", "lessons": [
                 {"title": "Brand Discovery Workshop", "video_url": "https://www.youtube.com/watch?v=y_2P5o_msuo"},
@@ -282,7 +282,7 @@ COURSES = [
         "language": "English",
         "tags": "venture-capital, finance, startups, investment",
         "instructor": "carlos_vega",
-        "thumbnail_url": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784265174/unsplash/1611974789855-9c2a0a7236a3.jpg",
         "modules": [
             {"title": "VC Fundamentals", "lessons": [
                 {"title": "How VC Funds Work", "video_url": "https://www.youtube.com/watch?v=1qy1GX6gugw"},
@@ -301,7 +301,7 @@ COURSES = [
         "language": "English",
         "tags": "landscape, nature, long-exposure, lightroom",
         "instructor": "sofia_bell",
-        "thumbnail_url": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+        "thumbnail_url": "https://res.cloudinary.com/dvex86jfq/image/upload/v1784263630/unsplash/1506905925346-21bda4d32df4.jpg",
         "modules": [
             {"title": "Planning & Field Craft", "lessons": [
                 {"title": "Location Scouting", "video_url": "https://www.youtube.com/watch?v=tQ9gPQAk8xY"},

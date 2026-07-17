@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import { getRole } from '../auth';
 
 const ROLE_COLORS = {
   STUDENT: '#2563eb',
@@ -12,21 +13,15 @@ function MentorDashboard() {
   const [courses, setCourses] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const username = localStorage.getItem('username');
-  const role = localStorage.getItem('role');
+  const role = getRole();
 
   useEffect(() => {
     Promise.all([fetchCourses(), fetchEnrollments()]).finally(() => setLoading(false));
   }, []);
 
   const fetchCourses = () =>
-    api.get('/courses/', { params: { page_size: 100 } }).then(res => {
-      const all = res.data.results || res.data;
-      if (role === 'ADMIN') {
-        setCourses(all);
-      } else {
-        setCourses(all.filter(c => c.mentor_name === username));
-      }
+    api.get('/courses/', { params: { page_size: 100, mine: 'true' } }).then(res => {
+      setCourses(res.data.results || res.data);
     }).catch(() => {});
 
   const fetchEnrollments = () =>

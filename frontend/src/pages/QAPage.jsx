@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api, { getWebSocketUrl } from '../api';
+import { getRole, getUsername } from '../auth';
 import FlagModal from '../components/FlagModal';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -13,8 +14,8 @@ function timeAgo(dateStr) {
     return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-const currentUser = () => localStorage.getItem('username');
-const currentRole = () => localStorage.getItem('role');
+const currentUser = () => getUsername();
+const currentRole = () => getRole();
 
 function AuthorAvatar({ name, isMentor }) {
     const letter = name ? name.charAt(0).toUpperCase() : 'U';

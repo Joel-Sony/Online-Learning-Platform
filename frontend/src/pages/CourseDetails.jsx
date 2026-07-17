@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api';
+import { getRole, getUsername, isAuthenticated } from '../auth';
 import FlagModal from '../components/FlagModal';
 
 /* ─── tiny icon helpers (match the style used on the Learn page) ──── */
@@ -66,7 +67,9 @@ function CourseDetails() {
   const [paymentError, setPaymentError] = useState('');
   const [enrolling, setEnrolling] = useState(false);
   const [flaggingReview, setFlaggingReview] = useState(null);
-  const isLoggedIn = !!localStorage.getItem('access');
+  const isLoggedIn = isAuthenticated();
+  const userRole = getRole();
+  const currentUsername = getUsername();
 
   useEffect(() => {
     fetchData();
@@ -484,6 +487,21 @@ function CourseDetails() {
                       <h4 style={{ marginBottom: '0.75rem' }}>Ready to start?</h4>
                       <p style={{ marginBottom: '1.5rem', fontSize: '0.9rem', color: 'var(--text-tertiary)' }}>Sign in to enrol in this course.</p>
                       <Link to="/login" className="btn btn-primary" style={{ width: '100%' }}>Sign In</Link>
+                    </div>
+                  ) : userRole === 'ADMIN' ? (
+                    <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                      <span className="badge" style={{ background: '#e5e7eb', color: '#6b7280', marginBottom: '0.75rem', display: 'inline-block' }}>Admin</span>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Admins cannot enroll in courses.</p>
+                    </div>
+                  ) : userRole === 'MENTOR' && course.mentor_name === currentUsername ? (
+                    <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                      <span className="badge" style={{ background: '#fef3c7', color: '#92400e', marginBottom: '0.75rem', display: 'inline-block' }}>Instructor</span>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                        Instructors cannot enroll in their own courses.
+                      </p>
+                      <Link to="/register" className="btn btn-primary btn-sm" style={{ width: '100%' }}>
+                        Register as a Student
+                      </Link>
                     </div>
                   ) : (
                     <div>

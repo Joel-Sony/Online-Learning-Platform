@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import { getRole, isAuthenticated } from '../auth';
 
 /* ── Mini course card for the homepage ─────────────────────── */
 function HomeCourseCard({ course }) {
@@ -40,8 +41,8 @@ function Home() {
   const [courses, setCourses] = useState([]);
   const [topRated, setTopRated] = useState([]);
   const [loading, setLoading] = useState(true);
-  const isLoggedIn = !!localStorage.getItem('access');
-  const role = localStorage.getItem('role');
+  const isLoggedIn = isAuthenticated();
+  const role = getRole();
 
   useEffect(() => {
     Promise.all([

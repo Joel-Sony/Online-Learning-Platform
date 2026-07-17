@@ -3,7 +3,7 @@ from courses.models import Lesson
 
 CONTENT = {
     # ===== Course 1: Complete Python Bootcamp =====
-    "Introduction to Python": """![Python Logo](https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80)
+    "Introduction to Python": """![Python Logo](https://res.cloudinary.com/dvex86jfq/image/upload/v1784264615/unsplash/1526374965328-7f61d4dc18c5.jpg)
 
 Python is a **high-level, interpreted programming language** created by Guido van Rossum and first released in 1991. Its design philosophy emphasizes code readability through significant indentation.
 
@@ -38,7 +38,7 @@ Python is an **interpreted language** — the source code is read and executed l
 
 This makes Python highly portable — code written on macOS runs unchanged on Windows or Linux.""",
 
-    "Variables and Data Types": """![Data Types](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80)
+    "Variables and Data Types": """![Data Types](https://res.cloudinary.com/dvex86jfq/image/upload/v1784265143/unsplash/1551288049-bebda4e38f71.jpg)
 
 Variables are **named containers** that store data in memory. Unlike statically-typed languages, Python uses **dynamic typing** — the interpreter infers the type at runtime.
 
@@ -103,7 +103,7 @@ price = float("19.99")  # String to float
 text = str(42)          # Integer to string
 ```""",
 
-    "Control Flow": """![Control Flow](https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=600&q=80)
+    "Control Flow": """![Control Flow](https://res.cloudinary.com/dvex86jfq/image/upload/v1784264484/unsplash/1516116216624-53e697fedbea.jpg)
 
 Control flow determines **which code executes and in what order**. Python provides conditional statements (`if/elif/else`) and loops (`for`, `while`) to manage execution paths.
 
@@ -181,7 +181,7 @@ for i in range(5):
     print(i)  # Prints 0, 1, 3, 4
 ```""",
 
-    "Functions & Scope": """![Functions](https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&q=80)
+    "Functions & Scope": """![Functions](https://res.cloudinary.com/dvex86jfq/image/upload/v1784264262/unsplash/1461749280684-dccba630e2f6.jpg)
 
 Functions are **reusable blocks of code** that perform a specific task. They help you organize code, avoid repetition, and manage complexity.
 
@@ -262,7 +262,7 @@ doubled = list(map(lambda x: x * 2, numbers))
 print(doubled)  # [2, 4, 6, 8]
 ```""",
 
-    "Classes and Objects": """![OOP](https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=600&q=80)
+    "Classes and Objects": """![OOP](https://res.cloudinary.com/dvex86jfq/image/upload/v1784264294/unsplash/1504639725590-34d0984388bd.jpg)
 
 Object-Oriented Programming (OOP) models real-world entities as **objects** with **attributes** (data) and **methods** (behaviour). A **class** is the blueprint; an **object** is an instance of that class.
 
@@ -334,7 +334,7 @@ v2 = Vector(4, 5)
 print(v1 + v2)  # Vector(6, 8)
 ```""",
 
-    "Inheritance": """![Inheritance](https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80)
+    "Inheritance": """![Inheritance](https://res.cloudinary.com/dvex86jfq/image/upload/v1784264135/unsplash/1451187580459-43490279c0fa.jpg)
 
 Inheritance lets a **child class** reuse and extend the behaviour of a **parent class**. This is one of the core pillars of OOP — promoting code reuse and establishing hierarchical relationships.
 
@@ -411,7 +411,7 @@ d.method()          # B (B comes before C in MRO)
 print(D.__mro__)    # D -> B -> C -> A -> object
 ```""",
 
-    "Polymorphism": """![Polymorphism](https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&q=80)
+    "Polymorphism": """![Polymorphism](https://res.cloudinary.com/dvex86jfq/image/upload/v1784265331/unsplash/1550751827-4bd374c3f58b.jpg)
 
 Polymorphism means "many forms" — different classes can be used interchangeably when they share a common interface. Python achieves polymorphism through **duck typing**: "If it walks like a duck and quacks like a duck, it's a duck."
 
@@ -491,7 +491,7 @@ class StripeProcessor(PaymentProcessor):
         return f"Refunding transaction {transaction_id}"
 ```""",
 
-    "Decorators": """![Decorators](https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=600&q=80)
+    "Decorators": """![Decorators](https://res.cloudinary.com/dvex86jfq/image/upload/v1784265241/unsplash/1555949963-ff9fe0c870eb.jpg)
 
 Decorators are **functions that modify other functions** — adding behaviour without changing the source code. The `@` syntax is syntactic sugar for `func = decorator(func)`.
 
@@ -581,7 +581,7 @@ def cache(func):
 @property      # Method that behaves like an attribute
 ```""",
 
-    "Web Scraper": """![Web Scraping](https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80)
+    "Web Scraper": """![Web Scraping](https://res.cloudinary.com/dvex86jfq/image/upload/v1784265177/unsplash/1558494949-ef010cbdcc31.jpg)
 
 Web scraping is the automated process of **extracting data from websites**. Python's `requests` and `BeautifulSoup` libraries make this accessible to any programmer.
 
@@ -654,7 +654,7 @@ def scrape_quotes():
     return quotes_data
 ```""",
 
-    "CLI Tool": """![CLI Tool](https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&q=80)
+    "CLI Tool": """![CLI Tool](https://res.cloudinary.com/dvex86jfq/image/upload/v1784265209/unsplash/1629654297299-c8506221ca97.jpg)
 
 Command-line interface (CLI) tools are **scripts run from the terminal**. They're essential for automation, data processing, and system administration tasks.
 
@@ -720,7 +720,7 @@ my-cli-tool/
 └── setup.py        # Package configuration
 ```""",
 
-    "File Automation": """![File Automation](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&q=80)
+    "File Automation": """![File Automation](https://res.cloudinary.com/dvex86jfq/image/upload/v1784265206/unsplash/1555066931-4365d14bab8c.jpg)
 
 Python's `os` and `shutil` modules let you **automate file operations** — rename, move, copy, delete, and organize files programmatically.
 
@@ -799,7 +799,7 @@ def organize_downloads(download_path):
 
     # Continue with more lessons... I need to map ALL 126 lessons
     # Let me add the remaining key lessons
-    "API Integration": """![API Integration](https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80)
+    "API Integration": """![API Integration](https://res.cloudinary.com/dvex86jfq/image/upload/v1784265177/unsplash/1558494949-ef010cbdcc31.jpg)
 
 REST APIs allow different software systems to **communicate over HTTP**. Modern applications are built by integrating multiple APIs — payment gateways, mapping services, social media, and more.
 

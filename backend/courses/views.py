@@ -108,23 +108,24 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response(list(results))
 
     def get_queryset(self):
-        # select_related('mentor') avoids one extra query per course for the
-        # serializer's `mentor_name` field.
         queryset = Course.objects.select_related('mentor').annotate(
             avg_rating=Avg('reviews__rating'),
             enrollment_count=Count('enrollments', distinct=True),
             total_duration=Sum('modules__lessons__duration_minutes')
         )
-        
+
         user = self.request.user
+        mine = self.request.query_params.get('mine')
+
+        if mine == 'true' and user.is_authenticated:
+            return queryset.filter(mentor=user)
+
         if user.is_authenticated:
             if user.role == 'ADMIN':
                 return queryset
             if user.role == 'MENTOR':
-                # Show published courses + mentor's own courses
                 return queryset.filter(Q(is_published=True) | Q(mentor=user)).distinct()
-        
-        # Unauthenticated users or Students see only published courses
+
         return queryset.filter(is_published=True)
 
 class ModuleViewSet(viewsets.ModelViewSet):
