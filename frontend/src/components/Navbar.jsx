@@ -81,13 +81,13 @@ function Navbar() {
             Catalog
           </Link>
 
-          {isAuthenticated && role === 'STUDENT' && (
+          {authed && role === 'STUDENT' && (
             <Link to="/learning" className={`nav-link ${isActive('/learning') ? 'active' : ''}`}>
               My Learning
             </Link>
           )}
 
-          {isAuthenticated && role === 'MENTOR' && (
+          {authed && role === 'MENTOR' && (
             <>
               <Link to="/mentor" className={`nav-link ${isActive('/mentor') ? 'active' : ''}`}>
                 Studio
@@ -101,7 +101,7 @@ function Navbar() {
             </>
           )}
 
-          {isAuthenticated && role === 'ADMIN' && (
+          {authed && role === 'ADMIN' && (
             <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
               Admin
             </Link>
@@ -135,7 +135,7 @@ function Navbar() {
 
         {/* Right: Auth + Notifications */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {isAuthenticated ? (
+          {authed ? (
             <>
               <NotificationDropdown />
 

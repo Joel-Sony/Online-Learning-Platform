@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import api, { getWebSocketUrl } from '../api';
+import { isAuthenticated } from '../auth';
 
 export const useNotifications = () => {
     const [notifications, setNotifications] = useState([]);
@@ -56,13 +57,14 @@ export const useNotifications = () => {
     }, []);
 
     useEffect(() => {
+        if (!isAuthenticated()) return;
+
         fetchNotifications();
         connectWebSocket();
 
         return () => {
             clearTimeout(reconnectTimerRef.current);
             if (socketRef.current) {
-                // Code 1000 = normal close → onclose won't trigger reconnect
                 socketRef.current.close(1000);
             }
         };
